@@ -76,7 +76,7 @@ spec {toURI} = T.simpleSpec performAction render
         , align: Typography.right
         , color: Typography.primary
         , style: createStyles {marginBottom: "1em"}
-        } [R.text "Locally Sourced Cuisine for the Average Family"]
+        } [R.text "Locally Sourced Cuisine for Average Families"]
       ] <> ( if state.windowSize < Laptop
                 then paragraph1
                 else
