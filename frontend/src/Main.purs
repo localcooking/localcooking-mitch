@@ -6,7 +6,7 @@ import Colors (palette)
 import Spec.Topbar.Buttons (topbarButtons)
 import Spec.Content (content)
 import LocalCooking.Links.Class (toLocation)
-
+import LocalCooking.Branding.Main (mainBrand)
 import LocalCooking.Main (defaultMain)
 import LocalCooking.Spec.Icons.ChefHat (chefHatViewBox, chefHat)
 
@@ -29,9 +29,11 @@ import React.DOM.SVG as RS
 import React.DOM.Props as RP
 import MaterialUI.InjectTapEvent (INJECT_TAP_EVENT)
 import MaterialUI.Divider (divider)
+import MaterialUI.Types (createStyles)
 import MaterialUI.SvgIcon (svgIcon)
 import MaterialUI.SvgIcon as SvgIcon
 import MaterialUI.Button (button)
+import MaterialUI.Button as Button
 import MaterialUI.ListItem (listItem)
 import MaterialUI.ListItemIcon (listItemIcon)
 import MaterialUI.ListItemText (listItemText)
