@@ -119,16 +119,20 @@ main = do
     , content: \{toURI,siteLinks,windowSizeSignal,currentPageSignal} ->
       [ content {toURI,siteLinks,windowSizeSignal,currentPageSignal} ]
     , extendedNetwork:
-      [ button
-        { href: "https://chef.localcooking.com/"
-        }
-        [ svgIcon
-          { viewBox: "0 0 279 279"
-          , color: SvgIcon.disabled
+      [ Button.withStyles
+        (\_ -> {root: createStyles {background: "#1565c0", color: "#fff", fontVariant: "normal"}})
+        \{classes} ->
+          button
+          { href: "https://chef.localcooking.com/"
+          , classes: Button.createClasses classes
           }
-          [ RS.svg [RP.src "https://chef.localcooking.com/static/images/icon.svg"] []
+          [ svgIcon
+            { viewBox: "0 0 279 279"
+            , color: SvgIcon.action
+            }
+            [ mainBrand
+            ]
+          , R.text "Chefs"
           ]
-        , R.text "Chef"
-        ]
       ]
     }
