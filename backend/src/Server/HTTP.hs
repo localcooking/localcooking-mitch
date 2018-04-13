@@ -10,7 +10,7 @@
 
 module Server.HTTP where
 
-import Links (SiteLinks (RootLink))
+import Links (SiteLinks (..), UserDetailsLinks (..))
 
 import LocalCooking.Types (AppM)
 import LocalCooking.Types.Env (Env (..))
@@ -29,22 +29,22 @@ import Control.Monad.Trans (lift)
 
 
 
-httpServer :: MiddlewareT AppM -> RouterT (MiddlewareT AppM) sec AppM ()
+httpServer :: (SiteLinks -> MiddlewareT AppM) -> RouterT (MiddlewareT AppM) sec AppM ()
 httpServer handleAuthToken = do
   Env{envHostname,envTls} <- lift ask
 
   -- main routes
   matchGroup (l_ "userDetails" </> o_) $ do
-    matchHere handleAuthToken
-    match (l_ "general" </> o_) handleAuthToken
-    match (l_ "security" </> o_) handleAuthToken
-    match (l_ "orders" </> o_) handleAuthToken
-    match (l_ "diet" </> o_) handleAuthToken
-    match (l_ "allergies" </> o_) handleAuthToken
+    matchHere $ handleAuthToken $ UserDetailsLink Nothing
+    match (l_ "general" </> o_) $ handleAuthToken $ UserDetailsLink $ Just UserDetailsGeneral
+    match (l_ "security" </> o_) $ handleAuthToken $ UserDetailsLink $ Just UserDetailsSecurity
+    match (l_ "orders" </> o_) $ handleAuthToken $ UserDetailsLink $ Just UserDetailsOrders
+    match (l_ "diet" </> o_) $ handleAuthToken $ UserDetailsLink $ Just UserDetailsDiet
+    match (l_ "allergies" </> o_) $ handleAuthToken $ UserDetailsLink $ Just UserDetailsAllergies
   matchGroup (l_ "meals" </> o_) $
-    matchHere handleAuthToken
+    matchHere $ handleAuthToken MealsLink
   matchGroup (l_ "chefs" </> o_) $
-    matchHere handleAuthToken
+    matchHere $ handleAuthToken ChefsLink
   matchAny $ \_ _ resp -> do
     resp $ textOnly "" status302
       [ ( "Location"
