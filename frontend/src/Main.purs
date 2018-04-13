@@ -122,7 +122,17 @@ main = do
       [ content {toURI,siteLinks,windowSizeSignal,currentPageSignal} ]
     , extendedNetwork:
       [ Button.withStyles
-        (\_ -> {root: createStyles {background: "#1565c0", color: "#fff", textTransform: "none"}})
+        (\_ ->
+          { root: createStyles
+            { background: "#1565c0"
+            , color: "#fff"
+            , textTransform: "none"
+            , "&:hover":
+              { background: "#5e92f3"
+              }
+            }
+          }
+        )
         \{classes} ->
           button
           { href: "https://chef.localcooking.com/"
@@ -135,7 +145,7 @@ main = do
             }
             [ mainBrand
             ]
-          , R.text " Chefs"
+          , R.text " Chefs"
           ]
       ]
     }
