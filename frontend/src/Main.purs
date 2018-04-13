@@ -1,10 +1,11 @@
 module Main where
 
-import Links (SiteLinks (..), ImageLinks (Logo40Png), initSiteLinks)
+import Links (SiteLinks (..), UserDetailsLinks (..), ImageLinks (Logo40Png), initSiteLinks)
 import Types.Env (env)
 import Colors (palette)
 import Spec.Topbar.Buttons (topbarButtons)
 import Spec.Content (content)
+import Spec.Content.UserDetails (userDetails)
 import LocalCooking.Links.Class (toLocation)
 import LocalCooking.Branding.Main (mainBrand)
 import LocalCooking.Main (defaultMain)
@@ -12,6 +13,7 @@ import LocalCooking.Spec.Icons.ChefHat (chefHatViewBox, chefHat)
 
 
 import Prelude
+import Data.Maybe (Maybe (..))
 import Data.UUID (GENUUID)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Now (NOW)
@@ -119,7 +121,42 @@ main = do
         ]
       }
     , content: \{toURI,siteLinks,windowSizeSignal,currentPageSignal} ->
-      [ content {toURI,siteLinks,windowSizeSignal,currentPageSignal} ]
+      [ content {toURI,siteLinks,windowSizeSignal,currentPageSignal}
+      ]
+    , userDetails:
+      { buttons: \{siteLinks} ->
+        [ listItem
+            { button: true
+            , onClick: mkEffFn1 \_ -> unsafeCoerceEff $ siteLinks $ UserDetailsLink $ Just UserDetailsOrdersLink
+            }
+            [ listItemText
+              { primary: "Orders"
+              }
+            ]
+        , divider {}
+        , listItem
+            { button: true
+            , onClick: mkEffFn1 \_ -> unsafeCoerceEff $ siteLinks $ UserDetailsLink $ Just UserDetailsDietLink
+            }
+            [ listItemText
+              { primary: "Diet"
+              }
+            ]
+        , divider {}
+        , listItem
+            { button: true
+            , onClick: mkEffFn1 \_ -> unsafeCoerceEff $ siteLinks $ UserDetailsLink $ Just UserDetailsAllergiesLink
+            }
+            [ listItemText
+              { primary: "Allergies"
+              }
+            ]
+        , divider {}
+        ]
+      , content: \{currentPageSignal,siteLinks} ->
+        [ userDetails {currentPageSignal,siteLinks}
+        ]
+      }
     , extendedNetwork:
       [ Button.withStyles
         (\_ ->

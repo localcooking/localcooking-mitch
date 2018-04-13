@@ -2,7 +2,6 @@ module Spec.Content.UserDetails where
 
 import Links (SiteLinks (UserDetailsLink), UserDetailsLinks (..))
 import Spec.Content.UserDetails.General (general)
-import Spec.Content.UserDetails.Security (security)
 import Spec.Content.UserDetails.Orders (orders)
 import Spec.Content.UserDetails.Diet (diet)
 import Spec.Content.UserDetails.Allergies (allergies)
@@ -33,6 +32,7 @@ import Control.Monad.Eff.Exception (EXCEPTION)
 
 import IxSignal.Internal (IxSignal)
 import IxSignal.Internal as IxSignal
+import Partial.Unsafe (unsafePartial)
 
 
 type State =
@@ -65,63 +65,17 @@ spec {siteLinks} = T.simpleSpec performAction render
 
     render :: T.Render State Unit Action
     render dispatch props state children =
-      [ Drawer.withStyles
-        (\_ -> {paper: createStyles {position: "relative", width: "200px", zIndex: 1000}})
-        \{classes} -> drawer
-          { variant: Drawer.permanent
-          , anchor: Drawer.left
-          , classes: Drawer.createClasses classes
-          }
-          [ list {dense: true}
-            [ sideButton UserDetailsGeneralLink
-            , divider {}
-            , sideButton UserDetailsSecurityLink
-            , divider {}
-            , sideButton UserDetailsOrdersLink
-            , divider {}
-            , sideButton UserDetailsDietLink
-            , divider {}
-            , sideButton UserDetailsAllergiesLink
-            , divider {}
-            , listItem
-              { button: true
-              }
-              [ listItemText
-                { primary: "Logout"
-                }
-              ]
-            ]
-          ]
-      , R.div [RP.style {position: "absolute", left: "230px", top: "1em"}]
-        [ case state.page of -- TODO pack currentPageSignal listener to this level, so
+        [ unsafePartial $
+          case state.page of -- TODO pack currentPageSignal listener to this level, so
                              -- side buttons aren't redrawn
             UserDetailsLink mUserDetails -> case mUserDetails of
               Nothing -> general
               Just x -> case x of
                 UserDetailsGeneralLink -> general
-                UserDetailsSecurityLink -> security
                 UserDetailsOrdersLink -> orders
                 UserDetailsDietLink -> diet
                 UserDetailsAllergiesLink -> allergies
-            _ -> general
         ]
-      ]
-      where
-        sideButton :: UserDetailsLinks -> R.ReactElement
-        sideButton x =
-          listItem
-            { button: true
-            , onClick: mkEffFn1 \_ -> unsafeCoerceEff $ siteLinks $ UserDetailsLink $ Just x
-            }
-            [ listItemText
-              { primary: case x of
-                  UserDetailsGeneralLink -> "General"
-                  UserDetailsSecurityLink -> "Security"
-                  UserDetailsOrdersLink -> "Orders"
-                  UserDetailsDietLink -> "Diet"
-                  UserDetailsAllergiesLink -> "Allergies"
-              }
-            ]
 
 
 userDetails :: forall eff

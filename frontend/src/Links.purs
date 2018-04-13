@@ -1,6 +1,6 @@
 module Links where
 
-import LocalCooking.Links.Class (class ToLocation, toLocation, class FromLocation, fromLocation, class LocalCookingSiteLinks, replaceState')
+import LocalCooking.Links.Class (class ToLocation, toLocation, class FromLocation, fromLocation, class LocalCookingSiteLinks, class LocalCookingUserDetailsLinks, replaceState', defaultSiteLinksPathParser)
 
 import Prelude
 import Data.Maybe (Maybe (..), maybe)
@@ -90,13 +90,15 @@ instance arbitraryUserDetailsLinks :: Arbitrary UserDetailsLinks where
     , pure UserDetailsAllergiesLink
     ]
 
-userDetailsLinksToDocumentTitle :: UserDetailsLinks -> String
-userDetailsLinksToDocumentTitle x = case x of
-  UserDetailsGeneralLink   -> "General - "
-  UserDetailsSecurityLink  -> "Security - "
-  UserDetailsOrdersLink    -> "Orders - "
-  UserDetailsDietLink      -> "Diet - "
-  UserDetailsAllergiesLink -> "Allergies - "
+instance localCookingUserDetailsLinksUserDetailsLinks :: LocalCookingUserDetailsLinks UserDetailsLinks where
+  userDetailsGeneralLink = UserDetailsGeneralLink
+  userDetailsSecurityLink = UserDetailsSecurityLink
+  toUserDetailsDocumentTitle x = case x of
+    UserDetailsGeneralLink   -> "General - "
+    UserDetailsSecurityLink  -> "Security - "
+    UserDetailsOrdersLink    -> "Orders - "
+    UserDetailsDietLink      -> "Diet - "
+    UserDetailsAllergiesLink -> "Allergies - "
 
 userDetailsLinksToPath :: UserDetailsLinks -> Path Rel File Sandboxed
 userDetailsLinksToPath x = case x of
@@ -192,18 +194,6 @@ instance showSiteLinks :: Show SiteLinks where
 instance eqSiteLinks :: Eq SiteLinks where
   eq = gEq
 
--- instance encodeJsonSiteLinks :: EncodeJson SiteLinks where
---   encodeJson x = encodeJson (show x)
-
--- instance decodeJsonSiteLinks :: DecodeJson SiteLinks where
---   decodeJson json = do
---     s <- decodeJson json -- FIXME use location parser
---     case runParser parseLocation s of
---       Left e -> fail (show e)
---       Right loc -> case siteLinksParser loc of
---         Left e -> fail e
---         Right x -> pure x
-
 instance toLocationSiteLinks :: ToLocation SiteLinks where
   toLocation x = case x of
     RootLink  -> Location (Left rootDir) Nothing Nothing
@@ -218,21 +208,18 @@ instance toLocationSiteLinks :: ToLocation SiteLinks where
         ) Nothing Nothing
 
 
-instance localCookingSiteLinksSiteLinks :: LocalCookingSiteLinks SiteLinks where
+instance localCookingSiteLinksSiteLinks :: LocalCookingSiteLinks SiteLinks UserDetailsLinks where
   rootLink = RootLink
   registerLink = RegisterLink
-  userDetailsLink = UserDetailsLink Nothing
-  isUserDetailsLink = case _ of
-    UserDetailsLink _ -> true
-    _ -> false
-  toDocumentTitle x = DocumentTitle $ case x of
-    RootLink -> "Local Cooking"
-    MealsLink -> "Meals - Local Cooking"
-    ChefsLink -> "Chefs - Local Cooking"
-    RegisterLink -> "Register - Local Cooking"
-    UserDetailsLink mUserDetails ->
-        maybe "" userDetailsLinksToDocumentTitle mUserDetails
-      <> "User Details - Local Cooking"
+  userDetailsLink = UserDetailsLink
+  getUserDetailsLink link = case link of
+    UserDetailsLink mDetails -> Just mDetails
+    _ -> Nothing
+  toDocumentTitle x = case x of
+    MealsLink -> "Meals - "
+    ChefsLink -> "Chefs - "
+    _ -> ""
+  subsidiaryTitle _ = ""
 
 
 -- Policy: don't fail on bad query params / fragment unless you have to
@@ -244,26 +231,14 @@ instance fromLocationSiteLinks :: FromLocation SiteLinks where
     where
       siteLinksPathParser :: Parser SiteLinks
       siteLinksPathParser = do
-        void divider
-        let root = RootLink <$ eof
+        let def = defaultSiteLinksPathParser userDetailsLinksParser
             meals = do
               void (string "meals")
               pure MealsLink
             chefs = do
               void (string "chefs")
               pure ChefsLink -- FIXME search parameters or hierarchy
-            register = do
-              void (string "register")
-              pure RegisterLink
-            userDetails = do
-              void (string "userDetails")
-              mUserDetails <- optionMaybe userDetailsLinksParser
-              pure (UserDetailsLink mUserDetails)
-        try meals
-          <|> try chefs
-          <|> try register
-          <|> try userDetails
-          <|> root
-        where
-          divider = char '/'
+        def
+          <|> try meals
+          <|> chefs
 
