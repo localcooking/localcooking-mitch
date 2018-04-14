@@ -1,0 +1,11 @@
+cd: The directory “localcooking-chef/frontend/” does not exist
+/usr/share/fish/functions/cd.fish (line 25): 	builtin cd $argv[1]
+                                             	^
+in function “cd”
+	called on line 7 of file ~/dev/localcooking/build-all.sh
+	with parameter list “localcooking-chef/frontend/”
+
+in function “build”
+	called on line 16 of file ~/dev/localcooking/build-all.sh
+	with parameter list “chef”
+
