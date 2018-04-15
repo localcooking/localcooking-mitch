@@ -231,6 +231,7 @@ instance fromLocationSiteLinks :: FromLocation SiteLinks where
     where
       siteLinksPathParser :: Parser SiteLinks
       siteLinksPathParser = do
+        divider
         let def = defaultSiteLinksPathParser userDetailsLinksParser
             meals = do
               void (string "meals")
@@ -238,7 +239,9 @@ instance fromLocationSiteLinks :: FromLocation SiteLinks where
             chefs = do
               void (string "chefs")
               pure ChefsLink -- FIXME search parameters or hierarchy
-        def
-          <|> try meals
-          <|> chefs
+        try meals
+          <|> try chefs
+          <|> def
+        where
+          divider = void (char '/')
 
