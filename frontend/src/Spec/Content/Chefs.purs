@@ -5,6 +5,7 @@ import Prelude
 import Thermite as T
 import React as R
 import React.DOM as R
+import React.DOM.Props as RP
 
 import MaterialUI.Typography (typography)
 import MaterialUI.Typography as Typography
