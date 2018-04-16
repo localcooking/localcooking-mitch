@@ -29,7 +29,10 @@ spec = T.simpleSpec performAction render
       [ typography
         { variant: Typography.display1
         , align: Typography.center
+        , color: Typography.primary
         } [R.text "Meals"]
+      , R.div [RP.style {marginBotton: "1em"}] []
+      , divider {}
       ]
 
 

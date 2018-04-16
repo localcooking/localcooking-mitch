@@ -184,6 +184,7 @@ main = do
             ]
           , R.text " Chefs"
           ]
+      , R.text " "
       , Button.withStyles
         (\_ ->
           { root: createStyles
