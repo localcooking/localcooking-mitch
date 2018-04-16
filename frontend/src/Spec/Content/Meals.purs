@@ -9,6 +9,7 @@ import React.DOM.Props as RP
 
 import MaterialUI.Typography (typography)
 import MaterialUI.Typography as Typography
+import MaterialUI.Divider (divider)
 
 
 
