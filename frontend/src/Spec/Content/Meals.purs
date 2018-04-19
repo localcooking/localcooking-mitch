@@ -58,10 +58,22 @@ spec = T.simpleSpec performAction render
             [ R.option
               [RP.key "test", RP.value "test"]
               [ R.text "Test"
-              , R.text "Test2"
-              , R.text "Test3"
-              , R.text "Test4"
-              , R.text "Test6"
+              ]
+            , R.option
+              [RP.key "test", RP.value "test"]
+              [ R.text "Test2"
+              ]
+            , R.option
+              [RP.key "test", RP.value "test"]
+              [ R.text "Test3"
+              ]
+            , R.option
+              [RP.key "test", RP.value "test"]
+              [ R.text "Test4"
+              ]
+            , R.option
+              [RP.key "test", RP.value "test"]
+              [ R.text "Test6"
               ]
             ]
           ]
