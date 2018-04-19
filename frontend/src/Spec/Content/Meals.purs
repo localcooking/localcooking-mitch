@@ -7,9 +7,14 @@ import React as R
 import React.DOM as R
 import React.DOM.Props as RP
 
+import MaterialUI.Types (createStyles)
 import MaterialUI.Typography (typography)
 import MaterialUI.Typography as Typography
+import MaterialUI.TextField (textField)
+import MaterialUI.TextField as TextField
 import MaterialUI.Divider (divider)
+import MaterialUI.Drawer (drawer)
+import MaterialUI.Drawer as Drawer
 
 
 
@@ -35,6 +40,43 @@ spec = T.simpleSpec performAction render
         } [R.text "Meals"]
       , R.div [RP.style {marginBotton: "1em"}] []
       , divider {}
+      , Drawer.withStyles
+        (\_ -> {paper: createStyles {position: "relative", width: "200px", zIndex: 1000}})
+        \{classes} -> drawer
+          { variant: Drawer.permanent
+          , anchor: Drawer.left
+          , classes: Drawer.createClasses classes
+          }
+          [ textField
+            { select: true
+            , "SelectProps":
+              { native: true
+              }
+            , label: R.text "Search Tags"
+            , helperText: R.text "Available tags"
+            }
+            [ R.option
+              [RP.key "test", RP.value "test"]
+              [ R.text "Test"
+              ]
+            , R.option
+              [RP.key "test", RP.value "test"]
+              [ R.text "Test2"
+              ]
+            , R.option
+              [RP.key "test", RP.value "test"]
+              [ R.text "Test3"
+              ]
+            , R.option
+              [RP.key "test", RP.value "test"]
+              [ R.text "Test4"
+              ]
+            , R.option
+              [RP.key "test", RP.value "test"]
+              [ R.text "Test6"
+              ]
+            ]
+          ]
       ]
 
 
