@@ -15,6 +15,8 @@ import MaterialUI.TextField as TextField
 import MaterialUI.Divider (divider)
 import MaterialUI.Drawer (drawer)
 import MaterialUI.Drawer as Drawer
+import MaterialUI.Button (button)
+import MaterialUI.Button as Button
 import MaterialUI.Chip (chip)
 import MaterialUI.Paper (paper)
 import MaterialUI.Collapse (collapse)
@@ -53,23 +55,55 @@ spec = T.simpleSpec performAction render
           [ textField
             { label: R.text "Search Tags"
             } []
-          , collapse
-            { in: true
-            }
-            [ paper {}
-              [ chip
-                { label: R.text "One"
-                }
-              , chip
-                { label: R.text "Two"
-                }
-              , chip
-                { label: R.text "Three"
-                }
-              , chip
-                { label: R.text "Four"
-                }
-              ]
+          , typography
+            { variant: Typography.headline
+            } [R.text "Results"]
+          , paper {style: createStyles {height: "5em", overflowY: "hidden"}}
+            [ chip
+              { label: R.text "One"
+              }
+            , chip
+              { label: R.text "Two"
+              }
+            , chip
+              { label: R.text "Three"
+              }
+            , chip
+              { label: R.text "Four"
+              }
+            ]
+          , divider {}
+          , typography
+            { variant: Typography.headline
+            } [R.text "Suggested"]
+          , paper {style: createStyles {height: "5em", overflowY: "hidden"}}
+            [ chip
+              { label: R.text "One"
+              }
+            , chip
+              { label: R.text "Two"
+              }
+            , chip
+              { label: R.text "Three"
+              }
+            , chip
+              { label: R.text "Four"
+              }
+            ]
+          , divider {}
+          , typography
+            { variant: Typography.headline
+            } [R.text "Delivering"]
+          , R.div []
+            [ button
+              { variant: Button.raised
+              }
+              [R.text "Before"]
+            , button
+              { variant: Button.raised
+              , disabled: true
+              }
+              [R.text "After"]
             ]
           ]
       ]
