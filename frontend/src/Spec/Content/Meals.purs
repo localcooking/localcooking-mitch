@@ -15,6 +15,9 @@ import MaterialUI.TextField as TextField
 import MaterialUI.Divider (divider)
 import MaterialUI.Drawer (drawer)
 import MaterialUI.Drawer as Drawer
+import MaterialUI.Chip (chip)
+import MaterialUI.Paper (paper)
+import MaterialUI.Collapse (collapse)
 
 
 
@@ -41,39 +44,31 @@ spec = T.simpleSpec performAction render
       , R.div [RP.style {marginBotton: "1em"}] []
       , divider {}
       , Drawer.withStyles
-        (\_ -> {paper: createStyles {position: "relative", width: "200px", zIndex: 1000}})
+        (\_ -> {paper: createStyles {position: "relative", width: "200px", zIndex: 1000, height: "30em"}})
         \{classes} -> drawer
           { variant: Drawer.permanent
           , anchor: Drawer.left
           , classes: Drawer.createClasses classes
           }
           [ textField
-            { select: true
-            , "SelectProps":
-              { native: true
-              }
-            , label: R.text "Search Tags"
-            , helperText: R.text "Available tags"
+            { label: R.text "Search Tags"
+            } []
+          , collapse
+            { in: true
             }
-            [ R.option
-              [RP.key "test", RP.value "test"]
-              [ R.text "Test"
-              ]
-            , R.option
-              [RP.key "test", RP.value "test"]
-              [ R.text "Test2"
-              ]
-            , R.option
-              [RP.key "test", RP.value "test"]
-              [ R.text "Test3"
-              ]
-            , R.option
-              [RP.key "test", RP.value "test"]
-              [ R.text "Test4"
-              ]
-            , R.option
-              [RP.key "test", RP.value "test"]
-              [ R.text "Test6"
+            [ paper {}
+              [ chip
+                { label: R.text "One"
+                }
+              , chip
+                { label: R.text "Two"
+                }
+              , chip
+                { label: R.text "Three"
+                }
+              , chip
+                { label: R.text "Four"
+                }
               ]
             ]
           ]
