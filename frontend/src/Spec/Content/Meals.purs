@@ -49,11 +49,14 @@ spec = T.simpleSpec performAction render
           }
           [ textField
             { select: true
+            , "SelectProps":
+              { native: true
+              }
             , label: R.text "Search Tags"
             , helperText: R.text "Available tags"
             }
             [ R.option
-              []
+              [RP.key "test", RP.value "test"]
               [R.text "Test"]
             ]
           ]
