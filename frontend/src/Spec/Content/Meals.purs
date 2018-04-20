@@ -144,16 +144,16 @@ spec = T.simpleSpec performAction render
               , onDelete: mkEffFn1 \_ -> pure unit
               }
             ]
-          ]
-        , grid {container: true, spacing: Grid.spacing8}
-          [ grid {item: true, xs: 4}
-            [ paper {style: createStyles {width: "100%", padding: "0.5em"}}
-              [ typography
-                { variant: Typography.headline
-                } [R.text "Wienerschnitzel"]
-              , typography
-                { variant: Typography.body1
-                } [R.text "Foo"]
+          , grid {container: true, spacing: Grid.spacing8}
+            [ grid {item: true, xs: 4}
+              [ paper {style: createStyles {width: "100%", padding: "0.5em"}}
+                [ typography
+                  { variant: Typography.headline
+                  } [R.text "Wienerschnitzel"]
+                , typography
+                  { variant: Typography.body1
+                  } [R.text "Foo"]
+                ]
               ]
             ]
           ]
