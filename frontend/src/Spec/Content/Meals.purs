@@ -65,7 +65,8 @@ spec = T.simpleSpec performAction render
                   searchIcon
               }
             } []
-          , paper {style: createStyles {height: "5em", overflowY: "hidden"}}
+          , R.div
+            [RP.style {height: "5em", overflowY: "hidden"}]
             [ chip
               { label: R.text "One"
               }
@@ -83,7 +84,8 @@ spec = T.simpleSpec performAction render
           , typography
             { variant: Typography.subheading
             } [R.text "Suggested"]
-          , paper {style: createStyles {height: "5em", overflowY: "hidden"}}
+          , R.div
+            [RP.style {height: "5em", overflowY: "hidden"}]
             [ chip
               { label: R.text "One"
               }
