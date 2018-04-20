@@ -8,6 +8,7 @@ import React.DOM as R
 import React.DOM.Props as RP
 
 import MaterialUI.Types (createStyles)
+import MaterialUI.Icons.Search (searchIcon)
 import MaterialUI.Typography (typography)
 import MaterialUI.Typography as Typography
 import MaterialUI.TextField (textField)
@@ -17,6 +18,8 @@ import MaterialUI.Drawer (drawer)
 import MaterialUI.Drawer as Drawer
 import MaterialUI.Button (button)
 import MaterialUI.Button as Button
+import MaterialUI.InputAdornment (inputAdornment)
+import MaterialUI.InputAdornment as InputAdornment
 import MaterialUI.Chip (chip)
 import MaterialUI.Paper (paper)
 import MaterialUI.Collapse (collapse)
@@ -53,11 +56,15 @@ spec = T.simpleSpec performAction render
           , classes: Drawer.createClasses classes
           }
           [ textField
-            { label: R.text "Search Tags"
+            { label: R.text "Search"
+            , "InputProps":
+              { startAdornment:
+                inputAdornment
+                  { position: InputAdornment.start
+                  }
+                  searchIcon
+              }
             } []
-          , typography
-            { variant: Typography.headline
-            } [R.text "Results"]
           , paper {style: createStyles {height: "5em", overflowY: "hidden"}}
             [ chip
               { label: R.text "One"
@@ -74,7 +81,7 @@ spec = T.simpleSpec performAction render
             ]
           , divider {}
           , typography
-            { variant: Typography.headline
+            { variant: Typography.subheading
             } [R.text "Suggested"]
           , paper {style: createStyles {height: "5em", overflowY: "hidden"}}
             [ chip
@@ -92,7 +99,7 @@ spec = T.simpleSpec performAction render
             ]
           , divider {}
           , typography
-            { variant: Typography.headline
+            { variant: Typography.subheading
             } [R.text "Delivering"]
           , R.div []
             [ button
