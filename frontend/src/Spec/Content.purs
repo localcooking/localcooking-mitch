@@ -17,7 +17,7 @@ import Data.UUID (GENUUID)
 import Data.URI (URI)
 import Data.URI.Location (Location)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE)
+import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Unsafe (unsafeCoerceEff, unsafePerformEff)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Exception (EXCEPTION)
@@ -27,6 +27,7 @@ import Crypto.Scrypt (SCRYPT)
 import IxSignal.Internal (IxSignal)
 import IxSignal.Internal as IxSignal
 import Partial.Unsafe (unsafePartial)
+import Unsafe.Coerce (unsafeCoerce)
 
 
 
@@ -81,6 +82,7 @@ spec
           RootLink -> root {windowSizeSignal,toURI}
           ChefsLink -> chefs
           MealsLink -> meals
+          _ -> unsafeCoerce $ unsafePerformEff $ log $ "current page on failure: " <> show state.page
       ]
 
 
