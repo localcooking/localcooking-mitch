@@ -53,7 +53,15 @@ spec = T.simpleSpec performAction render
       , divider {}
       , R.div [RP.style {position: "relative", width: "100%"}]
         [ Drawer.withStyles
-          (\_ -> {paper: createStyles {position: "relative", width: "200px", zIndex: 1000, height: "30em"}})
+          (\_ ->
+            { paper: createStyles
+              { position: "relative"
+              , width: "200px"
+              , zIndex: 1000
+              , height: "30em"
+              , paddingRight: "1em"
+              }
+            })
           \{classes} -> drawer
             { variant: Drawer.permanent
             , anchor: Drawer.left
@@ -112,13 +120,13 @@ spec = T.simpleSpec performAction render
               [ R.div []
                 [ button
                   { variant: Button.raised
-                  , fullWidth: true
+                  , style: createStyles {width: "50%"}
                   }
                   [R.text "Before"]
                 , button
                   { variant: Button.raised
                   , disabled: true
-                  , fullWidth: true
+                  , style: createStyles {width: "50%"}
                   }
                   [R.text "After"]
                 ]
