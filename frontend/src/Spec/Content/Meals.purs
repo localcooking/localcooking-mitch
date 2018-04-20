@@ -109,24 +109,29 @@ spec = T.simpleSpec performAction render
               { variant: Typography.subheading
               } [R.text "Delivering"]
             , R.div []
-              [ button
-                { variant: Button.raised
-                }
-                [R.text "Before"]
+              [ R.div []
+                [ button
+                  { variant: Button.raised
+                  , fullWidth: true
+                  }
+                  [R.text "Before"]
+                , button
+                  { variant: Button.raised
+                  , disabled: true
+                  , fullWidth: true
+                  }
+                  [R.text "After"]
+                ]
               , button
                 { variant: Button.raised
-                , disabled: true
-                }
-                [R.text "After"]
+                , fullWidth: true
+                } [R.text "2 Weeks", R.br [] [], R.text "From Now"]
               ]
-            , button
-              { variant: Button.raised
-              } [R.text "2 Weeks", R.br [] [], R.text "From Now"]
             ]
         , R.div
-          [ RP.style {position: "absolute", left: "200px", top: "1em", paddingLeft: "1em", width: "100%", maxWidth: "1048px", marginBottom: "1em"}
+          [ RP.style {position: "absolute", left: "200px", top: "1em", paddingLeft: "1em", width: "100%", maxWidth: "1048px"}
           ]
-          [ paper {style: createStyles {width: "100%", padding: "0.5em"}}
+          [ paper {style: createStyles {width: "100%", padding: "0.5em", marginBottom: "1em"}}
             [ chip
               { label: R.text "One"
               , onDelete: mkEffFn1 \_ -> pure unit
