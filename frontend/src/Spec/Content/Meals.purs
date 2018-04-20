@@ -119,7 +119,7 @@ spec = T.simpleSpec performAction render
               ]
             ]
         , R.div
-          [ RP.style {position: "absolute", left: "216px", top: "1em", paddingLeft: "1em", paddingRight: "1em", width: "100%", maxWidth: "1048px"}
+          [ RP.style {position: "absolute", left: "200px", top: "1em", paddingLeft: "1em", paddingRight: "1em", width: "100%", maxWidth: "1048px"}
           ]
           [ paper {style: createStyles {width: "100%", padding: "0.5em"}}
             [ chip
