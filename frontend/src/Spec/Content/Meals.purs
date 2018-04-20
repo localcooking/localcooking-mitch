@@ -19,6 +19,8 @@ import MaterialUI.Drawer (drawer)
 import MaterialUI.Drawer as Drawer
 import MaterialUI.Button (button)
 import MaterialUI.Button as Button
+import MaterialUI.Grid (grid)
+import MaterialUI.Grid as Grid
 import MaterialUI.Input (inputAdornment)
 import MaterialUI.Input as Input
 import MaterialUI.Chip (chip)
@@ -117,9 +119,12 @@ spec = T.simpleSpec performAction render
                 }
                 [R.text "After"]
               ]
+            , button
+              { variant: Button.raised
+              } [R.text "2 Weeks", R.br [] [], R.text "From Now"]
             ]
         , R.div
-          [ RP.style {position: "absolute", left: "200px", top: "1em", paddingLeft: "1em", paddingRight: "1em", width: "100%", maxWidth: "1048px"}
+          [ RP.style {position: "absolute", left: "200px", top: "1em", paddingLeft: "1em", width: "100%", maxWidth: "1048px", marginBottom: "1em"}
           ]
           [ paper {style: createStyles {width: "100%", padding: "0.5em"}}
             [ chip
@@ -138,6 +143,18 @@ spec = T.simpleSpec performAction render
               { label: R.text "Four"
               , onDelete: mkEffFn1 \_ -> pure unit
               }
+            ]
+          ]
+        , grid {container: true, spacing: Grid.spacing8}
+          [ grid {item: true, xs: 4}
+            [ paper {style: createStyles {width: "100%", padding: "0.5em"}}
+              [ typography
+                { variant: Typography.headline
+                } [R.text "Wienerschnitzel"]
+              , typography
+                { variant: Typography.body1
+                } [R.text "Foo"]
+              ]
             ]
           ]
         ]
