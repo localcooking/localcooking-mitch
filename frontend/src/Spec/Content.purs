@@ -78,11 +78,11 @@ spec
 
     render :: T.Render State Unit Action
     render dispatch props state children =
-      [ unsafePartial $ case state.page of
+      [ case state.page of
           RootLink -> root {windowSizeSignal,toURI}
           ChefsLink -> chefs
           MealsLink -> meals
-          _ -> unsafeCoerce $ unsafePerformEff $ log $ "current page on failure: " <> show state.page
+          _ -> R.text ""
       ]
 
 
