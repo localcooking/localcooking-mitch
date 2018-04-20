@@ -81,7 +81,15 @@ spec = T.simpleSpec performAction render
                 }
               } []
             , R.div
-              [RP.style {height: "15em", overflowY: "hidden"}] $
+              [ RP.style
+                { height: "15em"
+                , overflowY: "hidden"
+                , display: "flex"
+                , justifyContent: "center"
+                , flexWrap: "wrap"
+                , padding: "0.5em"
+                }
+              ] $
               map (\label -> tag {label,onClick: Just (pure unit), onDelete: Nothing})
                 [ "One"
                 , "Two"
