@@ -18,8 +18,8 @@ import MaterialUI.Drawer (drawer)
 import MaterialUI.Drawer as Drawer
 import MaterialUI.Button (button)
 import MaterialUI.Button as Button
-import MaterialUI.InputAdornment (inputAdornment)
-import MaterialUI.InputAdornment as InputAdornment
+import MaterialUI.Input (inputAdornment)
+import MaterialUI.Input as Input
 import MaterialUI.Chip (chip)
 import MaterialUI.Paper (paper)
 import MaterialUI.Collapse (collapse)
@@ -60,7 +60,7 @@ spec = T.simpleSpec performAction render
             , "InputProps":
               { startAdornment:
                 inputAdornment
-                  { position: InputAdornment.start
+                  { position: Input.start
                   }
                   searchIcon
               }
