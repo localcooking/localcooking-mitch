@@ -84,9 +84,6 @@ spec = T.simpleSpec performAction render
               [ RP.style
                 { height: "15em"
                 , overflowY: "hidden"
-                , display: "flex"
-                , justifyContent: "center"
-                , flexWrap: "wrap"
                 , padding: "0.5em"
                 }
               ] $
@@ -133,8 +130,6 @@ spec = T.simpleSpec performAction render
               , padding: "0.5em"
               , marginBottom: "1em"
               , display: "flex"
-              , justifyContent: "center"
-              , flexWrap: "wrap"
               }
             } $
             map (\label -> tag {label,onDelete: Just (pure unit), onClick: Nothing})
