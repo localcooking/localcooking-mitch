@@ -60,13 +60,7 @@ spec {label,onClick,onDelete} = T.simpleSpec performAction render
       [ Chip.withStyles
         (\theme ->
           { root: createStyles
-            { display: "flex"
-            , justifyContent: "center"
-            , flexWrap: "wrap"
-            , padding: theme.spacing.unit `div` 2
-            -- }
-          -- , chip: createStyles
-            , margin: theme.spacing.unit `div` 2
+            { margin: theme.spacing.unit `div` 2
             }
           }
         )

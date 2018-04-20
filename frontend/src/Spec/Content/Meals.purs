@@ -119,7 +119,16 @@ spec = T.simpleSpec performAction render
         , R.div
           [ RP.style {position: "absolute", left: "200px", top: "1em", paddingLeft: "1em", width: "100%", maxWidth: "1048px"}
           ]
-          [ paper {style: createStyles {width: "100%", padding: "0.5em", marginBottom: "1em"}} $
+          [ paper
+            { style: createStyles
+              { width: "100%"
+              , padding: "0.5em"
+              , marginBottom: "1em"
+              , display: "flex"
+              , justifyContent: "center"
+              , flexWrap: "wrap"
+              }
+            } $
             map (\label -> tag {label,onDelete: Just (pure unit), onClick: Nothing})
               [ "One"
               , "Two"
