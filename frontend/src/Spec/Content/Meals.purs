@@ -1,6 +1,7 @@
 module Spec.Content.Meals where
 
 import Prelude
+import Control.Monad.Eff.Uncurried (mkEffFn1)
 
 import Thermite as T
 import React as R
@@ -66,37 +67,38 @@ spec = T.simpleSpec performAction render
               }
             } []
           , R.div
-            [RP.style {height: "5em", overflowY: "hidden"}]
+            [RP.style {height: "15em", overflowY: "hidden"}]
             [ chip
               { label: R.text "One"
+              , onClick: mkEffFn1 \_ -> pure unit
               }
             , chip
               { label: R.text "Two"
+              , onClick: mkEffFn1 \_ -> pure unit
               }
             , chip
               { label: R.text "Three"
+              , onClick: mkEffFn1 \_ -> pure unit
               }
             , chip
               { label: R.text "Four"
-              }
-            ]
-          , divider {}
-          , typography
-            { variant: Typography.subheading
-            } [R.text "Suggested"]
-          , R.div
-            [RP.style {height: "5em", overflowY: "hidden"}]
-            [ chip
-              { label: R.text "One"
+              , onClick: mkEffFn1 \_ -> pure unit
               }
             , chip
-              { label: R.text "Two"
+              { label: R.text "Foo"
+              , onClick: mkEffFn1 \_ -> pure unit
               }
             , chip
-              { label: R.text "Three"
+              { label: R.text "Bar"
+              , onClick: mkEffFn1 \_ -> pure unit
               }
             , chip
-              { label: R.text "Four"
+              { label: R.text "Baz"
+              , onClick: mkEffFn1 \_ -> pure unit
+              }
+            , chip
+              { label: R.text "Qux"
+              , onClick: mkEffFn1 \_ -> pure unit
               }
             ]
           , divider {}
@@ -115,6 +117,28 @@ spec = T.simpleSpec performAction render
               [R.text "After"]
             ]
           ]
+      , R.div
+        [ RP.style {position: "absolute", left: "200px", top: "1em", paddingLeft: "1em", paddingRight: "1em", paddingTop: "1em"}
+        ]
+        [ paper {style: createStyles {width: "100%"}}
+          [ chip
+            { label: R.text "One"
+            , onDelete: mkEffFn1 \_ -> pure unit
+            }
+          , chip
+            { label: R.text "Two"
+            , onDelete: mkEffFn1 \_ -> pure unit
+            }
+          , chip
+            { label: R.text "Three"
+            , onDelete: mkEffFn1 \_ -> pure unit
+            }
+          , chip
+            { label: R.text "Four"
+            , onDelete: mkEffFn1 \_ -> pure unit
+            }
+          ]
+        ]
       ]
 
 
