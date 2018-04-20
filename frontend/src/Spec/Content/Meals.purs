@@ -76,6 +76,9 @@ spec = T.simpleSpec performAction render
               [ R.text "Test6"
               ]
             ]
+          , divider {}
+          -- TODO tag cloud thing
+          -- TODO timescale
           ]
       ]
 
