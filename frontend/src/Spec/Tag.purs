@@ -19,6 +19,7 @@ import Control.Monad.Eff.Unsafe (unsafeCoerceEff, unsafePerformEff)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Exception (EXCEPTION)
 
+import MaterialUI.Types (createStyles)
 import MaterialUI.Chip (chip)
 import MaterialUI.Chip as Chip
 
@@ -49,7 +50,7 @@ spec :: forall eff
         , onClick :: Maybe (Eff (Effects eff) Unit)
         , onDelete :: Maybe (Eff (Effects eff) Unit)
         }
-     -> T.Spec eff State Unit Action
+     -> T.Spec (Effects eff) State Unit Action
 spec {label,onClick,onDelete} = T.simpleSpec performAction render
   where
     performAction action props state = pure unit
@@ -58,37 +59,47 @@ spec {label,onClick,onDelete} = T.simpleSpec performAction render
     render dispatch props state children =
       [ Chip.withStyles
         (\theme ->
-          { root:
+          { root: createStyles
             { display: "flex"
             , justifyContent: "center"
             , flexWrap: "wrap"
             , padding: theme.spacing.unit `div` 2
-            }
-          , chip:
-            { margin: theme.spacing.unit `div` 2
+            -- }
+          -- , chip: createStyles
+            , margin: theme.spacing.unit `div` 2
             }
           }
         )
         \{classes} ->
         case Tuple onClick onDelete of
           Tuple (Just onClick') (Just onDelete') -> chip
-            { label: R.text "Three"
-            , onClick: mkEffFn1 \_ -> onClick'
-            , onDelete: mkEffFn1 \_ -> onDelete'
-            , classes
+            { label: R.text label
+            , onClick: mkEffFn1 \_ -> unsafeCoerceEff onClick'
+            , onDelete: mkEffFn1 \_ -> unsafeCoerceEff onDelete'
+            , classes: Chip.createClasses classes
             }
           Tuple Nothing (Just onDelete') -> chip
-            { label: R.text "Three"
-            , onDelete: mkEffFn1 \_ -> onDelete'
-            , classes
+            { label: R.text label
+            , onDelete: mkEffFn1 \_ -> unsafeCoerceEff onDelete'
+            , classes: Chip.createClasses classes
             }
           Tuple (Just onClick') Nothing -> chip
-            { label: R.text "Three"
-            , onClick: mkEffFn1 \_ -> onClick'
-            , classes
+            { label: R.text label
+            , onClick: mkEffFn1 \_ -> unsafeCoerceEff onClick'
+            , classes: Chip.createClasses classes
             }
           Tuple Nothing Nothing -> chip
-            { label: R.text "Three"
-            , classes
+            { label: R.text label
+            , classes: Chip.createClasses classes
             }
       ]
+
+
+tag :: forall eff
+     . { label :: String
+       , onClick :: Maybe (Eff (Effects eff) Unit)
+       , onDelete :: Maybe (Eff (Effects eff) Unit)
+       } -> R.ReactElement
+tag params =
+  let {spec: reactSpec, dispatcher} = T.createReactSpec (spec params) initialState
+  in  R.createElement (R.createClass reactSpec) unit []
