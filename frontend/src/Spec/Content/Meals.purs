@@ -117,7 +117,7 @@ spec = T.simpleSpec performAction render
               { variant: Typography.subheading
               } [R.text "Delivering"]
             , R.div []
-              [ R.div []
+              [ R.div [RP.style {marginBottom: "1em"}]
                 [ button
                   { variant: Button.raised
                   , style: createStyles {width: "50%"}
