@@ -4,6 +4,7 @@ import Spec.Tag (tag)
 
 import Prelude
 import Data.Maybe (Maybe (..))
+import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Uncurried (mkEffFn1)
 
 import Thermite as T
@@ -29,25 +30,58 @@ import MaterialUI.Input as Input
 import MaterialUI.Chip (chip)
 import MaterialUI.Paper (paper)
 import MaterialUI.Collapse (collapse)
+import MaterialUI.Dialog (dialog)
+import MaterialUI.DialogTitle (dialogTitle)
+import MaterialUI.DialogContent (dialogContent)
+import MaterialUI.DialogActions (dialogActions)
 
 
 
-type State = Unit
+type State =
+  { datepickerDialog :: Boolean
+  }
 
 initialState :: State
-initialState = unit
+initialState =
+  { datepickerDialog: false
+  }
 
-type Action = Unit
+data Action
+  = ClickedOpenDatepicker
+  | ClickedCloseDatepicker
 
 
-spec :: forall eff. T.Spec eff State Unit Action
+type Effects eff =
+  ( ref :: REF
+  | eff)
+
+
+spec :: forall eff
+      . T.Spec (Effects eff) State Unit Action
 spec = T.simpleSpec performAction render
   where
-    performAction action props state = pure unit
+    performAction action props state = case action of
+      ClickedOpenDatepicker -> void $ T.cotransform _ { datepickerDialog = false }
+      ClickedCloseDatepicker -> void $ T.cotransform _ { datepickerDialog = true }
 
     render :: T.Render State Unit Action
     render dispatch props state children =
-      [ typography
+      [ dialog
+        { open: state.datepickerDialog
+        }
+        [ dialogTitle {}
+          [R.text "Calendar"]
+        , dialogContent {}
+          [
+          ]
+        , dialogActions {}
+          [ button
+            { variant: Button.flat
+            , onTouchTap: mkEffFn1 \_ -> dispatch ClickedCloseDatepicker
+            } [R.text "Close"]
+          ]
+        ]
+      , typography
         { variant: Typography.display1
         , align: Typography.center
         , color: Typography.primary
@@ -118,6 +152,7 @@ spec = T.simpleSpec performAction render
               , button
                 { variant: Button.raised
                 , fullWidth: true
+                , onTouchTap: mkEffFn1 \_ -> dispatch ClickedOpenDatepicker
                 } [R.text "2 Weeks", R.br [] [], R.text "From Now"]
               ]
             ]
