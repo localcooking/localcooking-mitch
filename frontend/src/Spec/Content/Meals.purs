@@ -3,9 +3,16 @@ module Spec.Content.Meals where
 import Spec.Tag (tag)
 
 import Prelude
-import Data.Maybe (Maybe (..))
+import Data.Maybe (Maybe (..), fromJust)
+import Data.Date (Date, month, year, day, canonicalDate)
+import Data.Date.Component (Month (January, December))
+import Data.DateTime.Locale (LocalValue (..))
+import Data.Enum (pred, succ)
 import Control.Monad.Eff.Ref (REF)
+import Control.Monad.Eff.Now (nowDate)
 import Control.Monad.Eff.Uncurried (mkEffFn1)
+import Control.Monad.Eff.Unsafe (unsafePerformEff)
+import Partial.Unsafe (unsafePartial)
 
 import Thermite as T
 import React as R
@@ -14,6 +21,8 @@ import React.DOM.Props as RP
 
 import MaterialUI.Types (createStyles)
 import MaterialUI.Icons.Search (searchIcon)
+import MaterialUI.Icons.ChevronLeft (chevronLeftIcon)
+import MaterialUI.Icons.ChevronRight (chevronRightIcon)
 import MaterialUI.Typography (typography)
 import MaterialUI.Typography as Typography
 import MaterialUI.TextField (textField)
@@ -23,6 +32,8 @@ import MaterialUI.Drawer (drawer)
 import MaterialUI.Drawer as Drawer
 import MaterialUI.Button (button)
 import MaterialUI.Button as Button
+import MaterialUI.IconButton (iconButton)
+import MaterialUI.IconButton as IconButton
 import MaterialUI.Grid (grid)
 import MaterialUI.Grid as Grid
 import MaterialUI.Input (inputAdornment)
@@ -39,16 +50,20 @@ import MaterialUI.DialogActions (dialogActions)
 
 type State =
   { datepickerDialog :: Boolean
+  , datepicked :: Date
   }
 
-initialState :: State
-initialState =
+initialState :: {initDatepicked :: Date} -> State
+initialState {initDatepicked} =
   { datepickerDialog: false
+  , datepicked: initDatepicked
   }
 
 data Action
   = ClickedOpenDatepicker
   | ClickedCloseDatepicker
+  | ClickedPrevMonth
+  | ClickedNextMonth
 
 
 type Effects eff =
@@ -63,6 +78,22 @@ spec = T.simpleSpec performAction render
     performAction action props state = case action of
       ClickedOpenDatepicker -> void $ T.cotransform _ { datepickerDialog = true }
       ClickedCloseDatepicker -> void $ T.cotransform _ { datepickerDialog = false }
+      ClickedPrevMonth ->
+        let m = case month state.datepicked of
+              January -> December
+              x -> unsafePartial $ fromJust $ pred x
+            y = case month state.datepicked of
+              January -> unsafePartial $ fromJust $ pred $ year state.datepicked
+              _ -> year state.datepicked
+        in  void $ T.cotransform _ { datepicked = canonicalDate y m (day state.datepicked) }
+      ClickedNextMonth ->
+        let m = case month state.datepicked of
+              December -> January
+              x -> unsafePartial $ fromJust $ succ x
+            y = case month state.datepicked of
+              December -> unsafePartial $ fromJust $ succ $ year state.datepicked
+              _ -> year state.datepicked
+        in  void $ T.cotransform _ { datepicked = canonicalDate y m (day state.datepicked) }
 
     render :: T.Render State Unit Action
     render dispatch props state children =
@@ -72,7 +103,18 @@ spec = T.simpleSpec performAction render
         [ dialogTitle {}
           [R.text "Calendar"]
         , dialogContent {}
-          [
+          [ grid {container: true}
+            [ grid {item: true, xs: 2}
+                [iconButton {onTouchTap: mkEffFn1 \_ -> dispatch ClickedPrevMonth} chevronLeftIcon]
+            , grid {item: true, xs: 8}
+                [ typography
+                  { variant: Typography.headline
+                  } [ R.text $ show $ month state.datepicked
+                    ]
+                ]
+            , grid {item: true, xs: 2}
+                [iconButton {onTouchTap: mkEffFn1 \_ -> dispatch ClickedNextMonth} chevronRightIcon]
+            ]
           ]
         , dialogActions {}
           [ button
@@ -195,5 +237,10 @@ spec = T.simpleSpec performAction render
 
 meals :: R.ReactElement
 meals =
-  let {spec: reactSpec, dispatcher} = T.createReactSpec spec initialState
+  let init =
+        { initDatepicked: unsafePerformEff $ do
+             LocalValue _ d <- nowDate
+             pure d
+        }
+      {spec: reactSpec, dispatcher} = T.createReactSpec spec (initialState init)
   in  R.createElement (R.createClass reactSpec) unit []
