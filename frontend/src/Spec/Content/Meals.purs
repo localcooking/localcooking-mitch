@@ -1,6 +1,9 @@
 module Spec.Content.Meals where
 
+import Spec.Tag (tag)
+
 import Prelude
+import Data.Maybe (Maybe (..))
 import Control.Monad.Eff.Uncurried (mkEffFn1)
 
 import Thermite as T
@@ -78,40 +81,22 @@ spec = T.simpleSpec performAction render
                 }
               } []
             , R.div
-              [RP.style {height: "15em", overflowY: "hidden"}]
-              [ chip
-                { label: R.text "One"
-                , onClick: mkEffFn1 \_ -> pure unit
+              [ RP.style
+                { height: "15em"
+                , overflowY: "hidden"
+                , padding: "0.5em"
                 }
-              , chip
-                { label: R.text "Two"
-                , onClick: mkEffFn1 \_ -> pure unit
-                }
-              , chip
-                { label: R.text "Three"
-                , onClick: mkEffFn1 \_ -> pure unit
-                }
-              , chip
-                { label: R.text "Four"
-                , onClick: mkEffFn1 \_ -> pure unit
-                }
-              , chip
-                { label: R.text "Foo"
-                , onClick: mkEffFn1 \_ -> pure unit
-                }
-              , chip
-                { label: R.text "Bar"
-                , onClick: mkEffFn1 \_ -> pure unit
-                }
-              , chip
-                { label: R.text "Baz"
-                , onClick: mkEffFn1 \_ -> pure unit
-                }
-              , chip
-                { label: R.text "Qux"
-                , onClick: mkEffFn1 \_ -> pure unit
-                }
-              ]
+              ] $
+              map (\label -> tag {label,onClick: Just (pure unit), onDelete: Nothing})
+                [ "One"
+                , "Two"
+                , "Three"
+                , "Four"
+                , "Foo"
+                , "Bar"
+                , "Baz"
+                , "Qux"
+                ]
             , divider {}
             , typography
               { variant: Typography.subheading
@@ -139,24 +124,20 @@ spec = T.simpleSpec performAction render
         , R.div
           [ RP.style {position: "absolute", left: "200px", top: "1em", paddingLeft: "1em", width: "100%", maxWidth: "1048px"}
           ]
-          [ paper {style: createStyles {width: "100%", padding: "0.5em", marginBottom: "1em"}}
-            [ chip
-              { label: R.text "One"
-              , onDelete: mkEffFn1 \_ -> pure unit
+          [ paper
+            { style: createStyles
+              { width: "100%"
+              , padding: "0.5em"
+              , marginBottom: "1em"
+              , display: "flex"
               }
-            , chip
-              { label: R.text "Two"
-              , onDelete: mkEffFn1 \_ -> pure unit
-              }
-            , chip
-              { label: R.text "Three"
-              , onDelete: mkEffFn1 \_ -> pure unit
-              }
-            , chip
-              { label: R.text "Four"
-              , onDelete: mkEffFn1 \_ -> pure unit
-              }
-            ]
+            } $
+            map (\label -> tag {label,onDelete: Just (pure unit), onClick: Nothing})
+              [ "One"
+              , "Two"
+              , "Three"
+              , "Four"
+              ]
           , grid {container: true, spacing: Grid.spacing8}
             [ grid {item: true, xs: 4}
               [ paper {style: createStyles {width: "100%", padding: "0.5em"}}
@@ -169,6 +150,9 @@ spec = T.simpleSpec performAction render
                 ]
               ]
             ]
+          , divider {}
+          -- TODO tag cloud thing
+          -- TODO timescale
           ]
         ]
       ]
