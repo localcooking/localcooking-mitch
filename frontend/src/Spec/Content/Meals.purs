@@ -61,8 +61,8 @@ spec :: forall eff
 spec = T.simpleSpec performAction render
   where
     performAction action props state = case action of
-      ClickedOpenDatepicker -> void $ T.cotransform _ { datepickerDialog = false }
-      ClickedCloseDatepicker -> void $ T.cotransform _ { datepickerDialog = true }
+      ClickedOpenDatepicker -> void $ T.cotransform _ { datepickerDialog = true }
+      ClickedCloseDatepicker -> void $ T.cotransform _ { datepickerDialog = false }
 
     render :: T.Render State Unit Action
     render dispatch props state children =
