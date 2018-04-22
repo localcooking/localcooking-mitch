@@ -117,7 +117,11 @@ spec = T.simpleSpec performAction render
         , dialogContent {}
           [ grid {container: true}
             [ grid {item: true, xs: 2}
-              [iconButton {onTouchTap: mkEffFn1 \_ -> dispatch ClickedPrevMonth} chevronLeftIcon]
+              [ iconButton
+                { onTouchTap: mkEffFn1 \_ -> dispatch ClickedPrevMonth
+                , disabled: month state.datepicked == month today
+                } chevronLeftIcon
+              ]
             , grid {item: true, xs: 8}
               [ typography
                 { variant: Typography.headline
@@ -138,18 +142,29 @@ spec = T.simpleSpec performAction render
                             in  Table.withStylesCell
                               (\theme ->
                                 { root: case unit of
-                                     _ | state.datepicked == date ->
-                                         createStyles {background: theme.palette.secondary.light}
-                                       | current -> createStyles {}
-                                       | otherwise -> createStyles {background: "#ccc"}
+                                     _ | date < today ->
+                                         createStyles {textAlign: "center", background: "#aaa"}
+                                       | state.datepicked == date ->
+                                         createStyles {textAlign: "center", background: theme.palette.secondary.light}
+                                       | current ->
+                                         createStyles {textAlign: "center"}
+                                       | otherwise ->
+                                         createStyles {textAlign: "center", background: "#eee"}
                                 }
                               )
                               \{classes} ->
-                                tableCell
-                                  { padding: Table.dense
-                                  , classes: Table.createClassesCell classes
-                                  , onClick: mkEffFn1 \_ -> dispatch $ ClickedDate date
-                                  } $ R.text $ show $ fromEnum day
+                                let f | date < today =
+                                        tableCell
+                                          { padding: Table.dense
+                                          , classes: Table.createClassesCell classes
+                                          }
+                                      | otherwise =
+                                        tableCell
+                                          { padding: Table.dense
+                                          , classes: Table.createClassesCell classes
+                                          , onClick: mkEffFn1 \_ -> dispatch $ ClickedDate date
+                                          }
+                                in  f $ R.text $ show $ fromEnum day
                       in  [ cell sun
                           , cell mon
                           , cell tue
@@ -288,6 +303,10 @@ spec = T.simpleSpec performAction render
           ]
         ]
       ]
+
+    today = unsafePerformEff $ do
+      LocalValue _ d <- nowDate
+      pure d
 
 
 meals :: R.ReactElement
