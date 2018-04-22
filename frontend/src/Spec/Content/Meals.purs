@@ -141,15 +141,17 @@ spec = T.simpleSpec performAction render
                             let date = canonicalDate year month day
                             in  Table.withStylesCell
                               (\theme ->
-                                { root: case unit of
-                                     _ | date < today ->
-                                         createStyles {textAlign: "center", background: "#aaa"}
-                                       | state.datepicked == date ->
-                                         createStyles {textAlign: "center", background: theme.palette.secondary.light}
-                                       | current ->
-                                         createStyles {textAlign: "center"}
-                                       | otherwise ->
-                                         createStyles {textAlign: "center", background: "#eee"}
+                                { root: createStyles
+                                  { textAlign: "center"
+                                  , background: case unit of
+                                    _ | date < today -> "#aaa"
+                                      | current -> ""
+                                      | otherwise -> "#eee"
+                                  , border: case unit of
+                                    _ | state.datepicked == date -> "2px solid "
+                                        <> theme.palette.primary.light
+                                      | otherwise -> ""
+                                  }
                                 }
                               )
                               \{classes} ->
