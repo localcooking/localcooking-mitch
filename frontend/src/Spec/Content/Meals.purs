@@ -171,7 +171,8 @@ spec {pickDate} = T.simpleSpec performAction render
                     let Days x = diff state.datepicked today
                     in  Int.floor x
                   , R.br [] []
-                  , R.text "From Now"]
+                  , R.text "From Now"
+                  ]
               ]
             ]
         , R.div

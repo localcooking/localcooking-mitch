@@ -1,7 +1,7 @@
 module Spec.Content.Root where
 
 import LocalCooking.Window (WindowSize (Laptop))
-import Links (AboutPageLinks (..))
+import Links (SiteLinks (RegisterLink), AboutPageLinks (..))
 import LocalCooking.Links.Class (toLocation)
 
 import Prelude
@@ -9,8 +9,10 @@ import Data.UUID (GENUUID)
 import Data.URI (URI)
 import Data.URI.URI as URI
 import Data.URI.Location (Location)
+import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Ref (REF)
+import Control.Monad.Eff.Uncurried (mkEffFn1)
 import Control.Monad.Eff.Unsafe (unsafeCoerceEff, unsafePerformEff)
 
 import Thermite as T
@@ -18,6 +20,7 @@ import React as R
 import React.DOM as R
 import React.DOM.Props as RP
 import React.Signal.WhileMounted as Signal
+import React.DOM.Props.PreventDefault (preventDefault)
 
 import MaterialUI.Types (createStyles)
 import MaterialUI.Typography (typography)
@@ -25,6 +28,8 @@ import MaterialUI.Typography as Typography
 import MaterialUI.Divider (divider)
 import MaterialUI.Grid (grid)
 import MaterialUI.Grid as Grid
+import MaterialUI.Button (button)
+import MaterialUI.Button as Button
 import MaterialUI.List (list)
 import MaterialUI.ListItem (listItem)
 import MaterialUI.ListItemText (listItemText)
@@ -62,9 +67,10 @@ type Effects eff =
 
 spec :: forall eff
       . { toURI :: Location -> URI
+        , siteLinks :: SiteLinks -> Eff (Effects eff) Unit
         }
-     -> T.Spec eff State Unit Action
-spec {toURI} = T.simpleSpec performAction render
+     -> T.Spec (Effects eff) State Unit Action
+spec {toURI,siteLinks} = T.simpleSpec performAction render
   where
     performAction action props state = case action of
       ChangedWindowSize w -> void $ T.cotransform _ { windowSize = w }
@@ -78,7 +84,7 @@ spec {toURI} = T.simpleSpec performAction render
         , style: createStyles {marginBottom: "1em"}
         } [R.text "Locally Sourced Cuisine for Average Families"]
       ] <> ( if state.windowSize < Laptop
-                then paragraph1
+                then paragraph1 {toURI,siteLinks}
                 else
                   [ grid
                     { spacing: Grid.spacing8
@@ -86,7 +92,7 @@ spec {toURI} = T.simpleSpec performAction render
                     }
                     [ grid {xs: 8, item: true} $
                       [ R.div [RP.style {marginTop: "1em"}] []
-                      ] <> paragraph1 <>
+                      ] <> paragraph1 {toURI,siteLinks} <>
                       [ R.div [RP.style {marginBottom: "1em"}] []
                       ]
                     , grid {xs: 4, item: true}
@@ -160,13 +166,14 @@ spec {toURI} = T.simpleSpec performAction render
 root :: forall eff
       . { windowSizeSignal :: IxSignal (Effects eff) WindowSize
         , toURI :: Location -> URI
+        , siteLinks :: SiteLinks -> Eff (Effects eff) Unit
         }
      -> R.ReactElement
-root {windowSizeSignal,toURI} =
+root {windowSizeSignal,toURI,siteLinks} =
   let init =
         { initWindowSize: unsafePerformEff $ IxSignal.get windowSizeSignal
         }
-      {spec: reactSpec, dispatcher} = T.createReactSpec (spec {toURI}) (initialState init)
+      {spec: reactSpec, dispatcher} = T.createReactSpec (spec {toURI,siteLinks}) (initialState init)
       reactSpec' =
           Signal.whileMountedIxUUID
             windowSizeSignal
@@ -175,8 +182,12 @@ root {windowSizeSignal,toURI} =
   in  R.createElement (R.createClass reactSpec') unit []
 
 
-paragraph1 :: Array R.ReactElement
-paragraph1 =
+paragraph1 :: forall eff
+            . { toURI :: Location -> URI
+              , siteLinks :: SiteLinks -> Eff (Effects eff) Unit
+              }
+           -> Array R.ReactElement
+paragraph1 {toURI,siteLinks} =
   [ typography
     { variant: Typography.body1
     , align: Typography.left
@@ -199,6 +210,16 @@ paragraph1 =
     , R.text ", yet "
     , R.em [] [R.text "streamlined"]
     , R.text " enough to meet the needs of our modern world."
+    ]
+  , R.div [RP.style {textAlign: "right"}]
+    [ button
+      { href: URI.print $ toURI $ toLocation RegisterLink
+      , color: Button.primary
+      , onClick: mkEffFn1 preventDefault
+      , onTouchTap: mkEffFn1 \e -> do
+        preventDefault e
+        unsafeCoerceEff (siteLinks RegisterLink)
+      } [R.text "Sign Up Now"]
     ]
   ]
 

@@ -7,12 +7,6 @@ import Links (SiteLinks (..))
 import LocalCooking.Window (WindowSize)
 
 import Prelude
-
-import Thermite as T
-import React as R
-import React.DOM as R
-import React.DOM.Props as RP
-import React.Signal.WhileMounted as Signal
 import Data.UUID (GENUUID)
 import Data.URI (URI)
 import Data.URI.Location (Location)
@@ -21,6 +15,12 @@ import Control.Monad.Eff.Console (CONSOLE, log)
 import Control.Monad.Eff.Unsafe (unsafeCoerceEff, unsafePerformEff)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Exception (EXCEPTION)
+
+import Thermite as T
+import React as R
+import React.DOM as R
+import React.DOM.Props as RP
+import React.Signal.WhileMounted as Signal
 
 import Crypto.Scrypt (SCRYPT)
 
@@ -79,7 +79,7 @@ spec
     render :: T.Render State Unit Action
     render dispatch props state children =
       [ case state.page of
-          RootLink -> root {windowSizeSignal,toURI}
+          RootLink -> root {windowSizeSignal,toURI,siteLinks}
           ChefsLink -> chefs
           MealsLink -> meals
           _ -> R.text ""
