@@ -6,27 +6,17 @@ import Thermite as T
 import React as R
 import React.DOM as R
 import React.DOM.Props as RP
-import React.Signal.WhileMounted as Signal
-import Data.UUID (GENUUID)
-import Data.URI (URI)
 import Data.Maybe (Maybe (..))
 import Data.Tuple (Tuple (..))
-import Data.URI.Location (Location)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Uncurried (mkEffFn1)
-import Control.Monad.Eff.Console (CONSOLE, log)
-import Control.Monad.Eff.Unsafe (unsafeCoerceEff, unsafePerformEff)
+import Control.Monad.Eff.Unsafe (unsafeCoerceEff)
 import Control.Monad.Eff.Ref (REF)
-import Control.Monad.Eff.Exception (EXCEPTION)
 
 import MaterialUI.Types (createStyles)
 import MaterialUI.Chip (chip)
 import MaterialUI.Chip as Chip
 
-import IxSignal.Internal (IxSignal)
-import IxSignal.Internal as IxSignal
-import Partial.Unsafe (unsafePartial)
-import Unsafe.Coerce (unsafeCoerce)
 
 
 

@@ -262,9 +262,15 @@ data Duration
 
 instance showDuration :: Show Duration where
   show x = case x of
-    DaysUnit y -> show y <> " Days"
-    WeeksUnit (Tuple y h) -> show y <> show h <> " Weeks"
-    MonthsUnit (Tuple y h) -> show y <> show h <> " Months"
+    DaysUnit y ->
+      show y <>
+        if y == 1 then " Day" else " Days"
+    WeeksUnit (Tuple y h) ->
+      show y <> show h <>
+        if y == 1 || y == 0 then " Week" else " Weeks"
+    MonthsUnit (Tuple y h) ->
+      show y <> show h <>
+        if y == 1 || y == 0 then " Month" else " Months"
 
 
 humanReadableDuration :: Int -> Duration
