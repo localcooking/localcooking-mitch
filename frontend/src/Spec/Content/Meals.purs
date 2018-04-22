@@ -139,7 +139,7 @@ spec = T.simpleSpec performAction render
                               (\theme ->
                                 { root: case unit of
                                      _ | state.datepicked == date ->
-                                         createStyles {background: theme.palette.secondary."500"}
+                                         createStyles {background: theme.palette.secondary.light}
                                        | current -> createStyles {}
                                        | otherwise -> createStyles {background: "#ccc"}
                                 }
