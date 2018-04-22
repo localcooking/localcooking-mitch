@@ -200,10 +200,11 @@ spec {pickDateOutput} = T.simpleSpec performAction render
 
 datepicker :: forall eff
             . { pickDate :: OneIO.IOQueues (Effects eff) Unit Date
+              , initDatepicked :: Date
               } -> R.ReactElement
-datepicker {pickDate: OneIO.IOQueues {output: pickDateOutput, input: pickDateInput}} =
+datepicker {pickDate: OneIO.IOQueues {output: pickDateOutput, input: pickDateInput},initDatepicked} =
   let init =
-        { initDatepicked: unsafePerformEff initDatepicked
+        { initDatepicked
         }
       {spec: reactSpec, dispatcher} = T.createReactSpec (spec {pickDateOutput}) (initialState init)
       reactSpec' =

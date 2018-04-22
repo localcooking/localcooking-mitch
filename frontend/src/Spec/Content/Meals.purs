@@ -73,7 +73,7 @@ spec {pickDate} = T.simpleSpec performAction render
 
     render :: T.Render State Unit Action
     render dispatch props state children =
-      [ datepicker {pickDate}
+      [ datepicker {pickDate, initDatepicked: state.datepicked}
       , typography
         { variant: Typography.display1
         , align: Typography.center
