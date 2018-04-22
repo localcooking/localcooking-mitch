@@ -7,12 +7,14 @@ import Data.Monoid ((<>))
 import Data.Monoid.Endo (Endo (..))
 import Data.Maybe (Maybe (..), fromJust)
 import Data.Tuple (Tuple (..))
-import Data.Date (Date, month, year, day, canonicalDate, weekday, lastDayOfMonth)
+import Data.Date (Date, diff, month, year, day, canonicalDate, weekday, lastDayOfMonth)
 import Data.Date.Component (Month (January, December), Year, Weekday (..), Day)
-import Data.Date.Extra (getCalendar)
+import Data.Date.Extra (getCalendar, humanReadableDuration, plusTwoWeeks)
+import Data.Time.Duration (Days (..))
 import Data.DateTime.Locale (LocalValue (..))
 import Data.Enum (class Enum, pred, succ, toEnum, fromEnum)
 import Data.Array as Array
+import Data.Int as Int
 import Data.Unfoldable (unfoldr)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Now (nowDate)
@@ -145,6 +147,7 @@ spec = T.simpleSpec performAction render
                                   { textAlign: "center"
                                   , background: case unit of
                                     _ | date < today -> "#aaa"
+                                      | date == today -> theme.palette.secondary.light
                                       | current -> ""
                                       | otherwise -> "#eee"
                                   , border: case unit of
@@ -270,7 +273,11 @@ spec = T.simpleSpec performAction render
                 { variant: Button.raised
                 , fullWidth: true
                 , onTouchTap: mkEffFn1 \_ -> dispatch ClickedOpenDatepicker
-                } [R.text "2 Weeks", R.br [] [], R.text "From Now"]
+                } [ R.text $ show $ humanReadableDuration $
+                    let Days x = diff today state.datepicked
+                    in  Int.floor x
+                  , R.br [] []
+                  , R.text "From Now"]
               ]
             ]
         , R.div
@@ -316,7 +323,7 @@ meals =
   let init =
         { initDatepicked: unsafePerformEff $ do
              LocalValue _ d <- nowDate
-             pure d
+             pure (plusTwoWeeks d)
         }
       {spec: reactSpec, dispatcher} = T.createReactSpec spec (initialState init)
   in  R.createElement (R.createClass reactSpec) unit []

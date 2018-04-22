@@ -5,11 +5,13 @@ import Data.Monoid ((<>))
 import Data.Monoid.Endo (Endo (..))
 import Data.Maybe (Maybe (..), fromJust)
 import Data.Tuple (Tuple (..))
-import Data.Date (Date, year, month, day, weekday, canonicalDate, lastDayOfMonth)
+import Data.Date (Date, year, month, day, weekday, canonicalDate, lastDayOfMonth, diff)
+import Data.Time.Duration (Days (..))
 import Data.Date.Component (Year, Month (January, December), Weekday (..), Day)
 import Data.Enum (class Enum, pred, succ, toEnum, fromEnum)
 import Data.Array as Array
 import Data.Unfoldable (unfoldr)
+import Data.Int as Int
 import Partial.Unsafe (unsafePartial)
 
 
@@ -238,3 +240,63 @@ getCalendar y m =
       where
         x :: Day
         x = unsafePartial (fromJust (toEnum 1))
+
+
+
+
+
+data MaybeHalf
+  = None
+  | AHalf
+
+instance showMaybeHalf :: Show MaybeHalf where
+  show x = case x of
+    None -> ""
+    AHalf -> "½"
+
+
+data Duration
+  = DaysUnit Int
+  | WeeksUnit (Tuple Int MaybeHalf)
+  | MonthsUnit (Tuple Int MaybeHalf)
+
+instance showDuration :: Show Duration where
+  show x = case x of
+    DaysUnit y -> show y <> " Days"
+    WeeksUnit (Tuple y h) -> show y <> show h <> " Weeks"
+    MonthsUnit (Tuple y h) -> show y <> show h <> " Months"
+
+
+humanReadableDuration :: Int -> Duration
+humanReadableDuration days
+  | days < 4 = DaysUnit days
+  | days < 6 = WeeksUnit (Tuple 0 AHalf)
+  | days < 9 = WeeksUnit (Tuple 1 None)
+  | days < 12 = WeeksUnit (Tuple 1 AHalf)
+  | days < 15 = WeeksUnit (Tuple 2 None)
+  | days < 19 = WeeksUnit (Tuple 2 AHalf)
+  | days < 22 = WeeksUnit (Tuple 3 None)
+  | days < 27 = WeeksUnit (Tuple 3 AHalf)
+  | days < 32 = MonthsUnit (Tuple 1 None)
+  | days < 55 = MonthsUnit (Tuple 1 AHalf)
+  | days < 65 = MonthsUnit (Tuple 2 None)
+  | days < 80 = MonthsUnit (Tuple 2 AHalf)
+  | otherwise = MonthsUnit (Tuple 3 None)
+
+
+
+plusTwoWeeks :: Date -> Date
+plusTwoWeeks d = case unit of
+  _ | Int.floor delta >= 14 ->
+        canonicalDate (year d) (month d)
+          (unsafePartial (fromJust (toEnum (fromEnum (day d) + 14))))
+    | otherwise -> case month d of
+      December ->
+        canonicalDate (unsafePartial (fromJust (succ (year d)))) January
+          (unsafePartial (fromJust (toEnum (14 - Int.floor delta))))
+      _ ->
+        canonicalDate (year d) (unsafePartial (fromJust (succ (month d))))
+          (unsafePartial (fromJust (toEnum (14 - Int.floor delta))))
+  where
+    lastDay = lastDayOfMonth (year d) (month d)
+    Days delta = diff d (canonicalDate (year d) (month d) lastDay)
