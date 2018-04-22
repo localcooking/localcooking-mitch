@@ -274,7 +274,7 @@ spec = T.simpleSpec performAction render
                 , fullWidth: true
                 , onTouchTap: mkEffFn1 \_ -> dispatch ClickedOpenDatepicker
                 } [ R.text $ show $ humanReadableDuration $
-                    let Days x = diff today state.datepicked
+                    let Days x = diff state.datepicked today
                     in  Int.floor x
                   , R.br [] []
                   , R.text "From Now"]

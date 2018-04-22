@@ -299,4 +299,4 @@ plusTwoWeeks d = case unit of
           (unsafePartial (fromJust (toEnum (14 - Int.floor delta))))
   where
     lastDay = lastDayOfMonth (year d) (month d)
-    Days delta = diff d (canonicalDate (year d) (month d) lastDay)
+    Days delta = diff (canonicalDate (year d) (month d) lastDay) d
