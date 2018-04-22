@@ -7,10 +7,12 @@ import Prelude
 import Data.Maybe (Maybe (..))
 import Data.Date (Date, diff)
 import Data.Date.Extra (humanReadableDuration, plusTwoWeeks)
-import Data.Time.Duration (Days (..))
+import Data.Time.Duration (Days (..), Milliseconds (..))
 import Data.DateTime.Locale (LocalValue (..))
 import Data.Int as Int
+import Data.Generic (class Generic, gEq)
 import Control.Monad.Base (liftBase)
+import Control.Monad.Aff (delay)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Now (nowDate)
 import Control.Monad.Eff.Uncurried (mkEffFn1)
@@ -41,18 +43,31 @@ import Queue.One.Aff as OneIO
 
 
 
+data DatepickDirection
+  = Before
+  | After
+
+derive instance genericDatepickDirection :: Generic DatepickDirection
+
+instance eqDatepickDirection :: Eq DatepickDirection where
+  eq = gEq
+
+
 
 type State =
   { datepicked :: Date
+  , datepickDirection :: DatepickDirection
   }
 
 initialState :: {initDatepicked :: Date} -> State
 initialState {initDatepicked} =
   { datepicked: initDatepicked
+  , datepickDirection: Before
   }
 
 data Action
   = ClickedOpenDatepicker
+  | ChangedDatepickDirection DatepickDirection
 
 
 type Effects eff =
@@ -69,7 +84,10 @@ spec {pickDate} = T.simpleSpec performAction render
     performAction action props state = case action of
       ClickedOpenDatepicker -> do
         date <- liftBase (OneIO.callAsync pickDate unit)
+        liftBase $ delay $ Milliseconds 300.0
         void $ T.cotransform _ { datepicked = date }
+      ChangedDatepickDirection x ->
+        void $ T.cotransform _ { datepickDirection = x }
 
     render :: T.Render State Unit Action
     render dispatch props state children =
@@ -133,12 +151,15 @@ spec {pickDate} = T.simpleSpec performAction render
                 [ button
                   { variant: Button.raised
                   , style: createStyles {width: "50%"}
+                  , disabled: state.datepickDirection == Before
+                  , onTouchTap: mkEffFn1 \_ -> dispatch (ChangedDatepickDirection Before)
                   }
                   [R.text "Before"]
                 , button
                   { variant: Button.raised
-                  , disabled: true
                   , style: createStyles {width: "50%"}
+                  , disabled: state.datepickDirection == After
+                  , onTouchTap: mkEffFn1 \_ -> dispatch (ChangedDatepickDirection After)
                   }
                   [R.text "After"]
                 ]
