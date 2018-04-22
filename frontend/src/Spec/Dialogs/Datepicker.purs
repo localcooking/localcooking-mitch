@@ -210,7 +210,7 @@ datepicker {pickDate: OneIO.IOQueues {output: pickDateOutput, input: pickDateInp
           Queue.whileMountedOne pickDateInput
             (\this _ -> unsafeCoerceEff $ dispatcher this ClickedOpenDatepicker)
         $ reactSpec
-  in  R.createElement (R.createClass reactSpec) unit []
+  in  R.createElement (R.createClass reactSpec') unit []
 
 
 initDatepicked :: forall eff. Eff (now :: NOW | eff) Date
