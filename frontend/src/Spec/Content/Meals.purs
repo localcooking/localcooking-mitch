@@ -122,7 +122,9 @@ spec = T.simpleSpec performAction render
               [ typography
                 { variant: Typography.headline
                 , align: Typography.center
-                } [ R.text $ show $ month state.datepicked
+                } [ R.text $ show (month state.datepicked)
+                          <> " "
+                          <> show (fromEnum $ year state.datepicked)
                   ]
               ]
             , grid {item: true, xs: 2}
@@ -132,18 +134,22 @@ spec = T.simpleSpec performAction render
                 let xs = getCalendar (year state.datepicked) (month state.datepicked)
                     week {sun,mon,tue,wed,thu,fri,sat} = tableRow {} $
                       let cell {current,day,month,year} =
-                            Table.withStylesCell
-                              (\_ -> { root: if current
-                                                then createStyles {}
-                                                else createStyles {background: "#aaa"}
-                                     }
+                            let date = canonicalDate year month day
+                            in  Table.withStylesCell
+                              (\theme ->
+                                { root: case unit of
+                                     _ | state.datepicked == date ->
+                                         createStyles {background: theme.palette.secondary."500"}
+                                       | current -> createStyles {}
+                                       | otherwise -> createStyles {background: "#ccc"}
+                                }
                               )
                               \{classes} ->
-                              tableCell
-                                { padding: Table.dense
-                                , classes: Table.createClassesCell classes
-                                , onClick: mkEffFn1 \_ -> dispatch $ ClickedDate $ canonicalDate year month day
-                                } $ R.text $ show $ fromEnum day
+                                tableCell
+                                  { padding: Table.dense
+                                  , classes: Table.createClassesCell classes
+                                  , onClick: mkEffFn1 \_ -> dispatch $ ClickedDate date
+                                  } $ R.text $ show $ fromEnum day
                       in  [ cell sun
                           , cell mon
                           , cell tue
@@ -154,13 +160,13 @@ spec = T.simpleSpec performAction render
                           ]
                 in  [ tableHead {}
                       [ tableRow {}
-                        [ tableCell {padding: Table.dense} $ R.text "Sun"
-                        , tableCell {padding: Table.dense} $ R.text "Mon"
-                        , tableCell {padding: Table.dense} $ R.text "Tue"
-                        , tableCell {padding: Table.dense} $ R.text "Wed"
-                        , tableCell {padding: Table.dense} $ R.text "Thu"
-                        , tableCell {padding: Table.dense} $ R.text "Fri"
-                        , tableCell {padding: Table.dense} $ R.text "Sat"
+                        [ tableCell {padding: Table.dense} (R.text "Sun")
+                        , tableCell {padding: Table.dense} (R.text "Mon")
+                        , tableCell {padding: Table.dense} (R.text "Tue")
+                        , tableCell {padding: Table.dense} (R.text "Wed")
+                        , tableCell {padding: Table.dense} (R.text "Thu")
+                        , tableCell {padding: Table.dense} (R.text "Fri")
+                        , tableCell {padding: Table.dense} (R.text "Sat")
                         ]
                       ]
                     , tableBody {} (week <$> xs)
