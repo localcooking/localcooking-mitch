@@ -9,6 +9,7 @@ import Data.Maybe (Maybe (..), fromJust)
 import Data.Tuple (Tuple (..))
 import Data.Date (Date, month, year, day, canonicalDate, weekday, lastDayOfMonth)
 import Data.Date.Component (Month (January, December), Year, Weekday (..), Day)
+import Data.Date.Extra (getCalendar)
 import Data.DateTime.Locale (LocalValue (..))
 import Data.Enum (class Enum, pred, succ, toEnum, fromEnum)
 import Data.Array as Array
@@ -71,6 +72,7 @@ data Action
   | ClickedCloseDatepicker
   | ClickedPrevMonth
   | ClickedNextMonth
+  | ClickedDate Date
 
 
 type Effects eff =
@@ -101,6 +103,8 @@ spec = T.simpleSpec performAction render
               December -> unsafePartial $ fromJust $ succ $ year state.datepicked
               _ -> year state.datepicked
         in  void $ T.cotransform _ { datepicked = canonicalDate y m (day state.datepicked) }
+      ClickedDate d ->
+        void $ T.cotransform _ { datepicked = d, datepickerDialog = false }
 
     render :: T.Render State Unit Action
     render dispatch props state children =
@@ -127,8 +131,19 @@ spec = T.simpleSpec performAction render
               [ table {} $
                 let xs = getCalendar (year state.datepicked) (month state.datepicked)
                     week {sun,mon,tue,wed,thu,fri,sat} = tableRow {} $
-                      let cell {current,day} =
-                            tableCell {padding: Table.dense} $ R.text $ show $ fromEnum day
+                      let cell {current,day,month,year} =
+                            Table.withStylesCell
+                              (\_ -> { root: if current
+                                                then createStyles {}
+                                                else createStyles {background: "#aaa"}
+                                     }
+                              )
+                              \{classes} ->
+                              tableCell
+                                { padding: Table.dense
+                                , classes: Table.createClassesCell classes
+                                , onClick: mkEffFn1 \_ -> dispatch $ ClickedDate $ canonicalDate year month day
+                                } $ R.text $ show $ fromEnum day
                       in  [ cell sun
                           , cell mon
                           , cell tue
@@ -279,201 +294,3 @@ meals =
       {spec: reactSpec, dispatcher} = T.createReactSpec spec (initialState init)
   in  R.createElement (R.createClass reactSpec) unit []
 
-
-
-type Week a =
-  { sun :: a
-  , mon :: a
-  , tue :: a
-  , wed :: a
-  , thu :: a
-  , fri :: a
-  , sat :: a
-  }
-
-getCalendar :: Year -> Month -> Array (Week {current :: Boolean, day :: Day})
-getCalendar y m =
-  [ firstWeek
-  ] <> ( let go sunday
-               | sunday >= secondToLastWeekSunday = Nothing
-               | otherwise = Just (Tuple (buildWeek sunday) (succN 7 sunday))
-         in  unfoldr go secondWeekSunday
-       )
-    <>
-  [ lastWeek
-  ]
-  where
-    secondWeekSunday :: Day
-    secondWeekSunday = case weekday firstDay of
-      Sunday -> succN 7 x
-      Monday -> succN 6 x
-      Tuesday -> succN 5 x
-      Wednesday -> succN 4 x
-      Thursday -> succN 3 x
-      Friday -> succN 2 x
-      Saturday -> succN 1 x
-      where
-        x = day firstDay
-    secondToLastWeekSunday :: Day
-    secondToLastWeekSunday = case weekday (canonicalDate y m lastDay) of
-      Sunday -> predN 7 lastDay
-      Monday -> predN 8 lastDay
-      Tuesday -> predN 9 lastDay
-      Wednesday -> predN 10 lastDay
-      Thursday -> predN 11 lastDay
-      Friday -> predN 12 lastDay
-      Saturday -> predN 13 lastDay
-    firstDay :: Date
-    firstDay = canonicalDate y m $ unsafePartial $ fromJust $ toEnum 1
-    lastDay :: Day
-    lastDay = lastDayOfMonth y m
-    lastWeek :: Week {current :: Boolean, day :: Day}
-    lastWeek = case weekday (canonicalDate y m lastDay) of
-      Sunday ->
-        { sun: {current: true, day: lastDay}
-        , mon: {current: false, day: firstDayNextMonth}
-        , tue: {current: false, day: succN 1 firstDayNextMonth}
-        , wed: {current: false, day: succN 2 firstDayNextMonth}
-        , thu: {current: false, day: succN 3 firstDayNextMonth}
-        , fri: {current: false, day: succN 4 firstDayNextMonth}
-        , sat: {current: false, day: succN 5 firstDayNextMonth}
-        }
-      Monday ->
-        { sun: {current: true, day: predN 1 lastDay}
-        , mon: {current: true, day: lastDay}
-        , tue: {current: false, day: firstDayNextMonth}
-        , wed: {current: false, day: succN 1 firstDayNextMonth}
-        , thu: {current: false, day: succN 2 firstDayNextMonth}
-        , fri: {current: false, day: succN 3 firstDayNextMonth}
-        , sat: {current: false, day: succN 4 firstDayNextMonth}
-        }
-      Tuesday ->
-        { sun: {current: true, day: predN 2 lastDay}
-        , mon: {current: true, day: predN 1 lastDay}
-        , tue: {current: true, day: lastDay}
-        , wed: {current: false, day: firstDayNextMonth}
-        , thu: {current: false, day: succN 1 firstDayNextMonth}
-        , fri: {current: false, day: succN 2 firstDayNextMonth}
-        , sat: {current: false, day: succN 3 firstDayNextMonth}
-        }
-      Wednesday ->
-        { sun: {current: true, day: predN 3 lastDay}
-        , mon: {current: true, day: predN 2 lastDay}
-        , tue: {current: true, day: predN 1 lastDay}
-        , wed: {current: true, day: lastDay}
-        , thu: {current: false, day: firstDayNextMonth}
-        , fri: {current: false, day: succN 1 firstDayNextMonth}
-        , sat: {current: false, day: succN 2 firstDayNextMonth}
-        }
-      Thursday ->
-        { sun: {current: true, day: predN 4 lastDay}
-        , mon: {current: true, day: predN 3 lastDay}
-        , tue: {current: true, day: predN 2 lastDay}
-        , wed: {current: true, day: predN 1 lastDay}
-        , thu: {current: true, day: lastDay}
-        , fri: {current: false, day: firstDayNextMonth}
-        , sat: {current: false, day: succ' firstDayNextMonth}
-        }
-      Friday ->
-        { sun: {current: true, day: predN 5 lastDay}
-        , mon: {current: true, day: predN 4 lastDay}
-        , tue: {current: true, day: predN 3 lastDay}
-        , wed: {current: true, day: predN 2 lastDay}
-        , thu: {current: true, day: predN 1 lastDay}
-        , fri: {current: true, day: lastDay}
-        , sat: {current: false, day: firstDayNextMonth}
-        }
-      Saturday -> buildWeek (predN 6 lastDay)
-      where
-        firstDayNextMonth :: Day
-        firstDayNextMonth = day $ case m of
-          December -> canonicalDate (succ' y) January x
-          _ -> canonicalDate y (succ' m) x
-          where
-            x :: Day
-            x = unsafePartial (fromJust (toEnum 1))
-    firstWeek :: Week {current :: Boolean, day :: Day}
-    firstWeek = case weekday firstDay of
-      Sunday -> buildWeek firstDay'
-      Monday ->
-        { sun: {current: false, day: lastDayPreviousMonth}
-        , mon: {current: true, day: firstDay'}
-        , tue: {current: true, day: succN 1 firstDay'}
-        , wed: {current: true, day: succN 2 firstDay'}
-        , thu: {current: true, day: succN 3 firstDay'}
-        , fri: {current: true, day: succN 4 firstDay'}
-        , sat: {current: true, day: succN 5 firstDay'}
-        }
-      Tuesday ->
-        { sun: {current: false, day: pred' lastDayPreviousMonth}
-        , mon: {current: false, day: lastDayPreviousMonth}
-        , tue: {current: true, day: firstDay'}
-        , wed: {current: true, day: succN 1 firstDay'}
-        , thu: {current: true, day: succN 2 firstDay'}
-        , fri: {current: true, day: succN 3 firstDay'}
-        , sat: {current: true, day: succN 4 firstDay'}
-        }
-      Wednesday ->
-        { sun: {current: false, day: predN 2 lastDayPreviousMonth}
-        , mon: {current: false, day: predN 1 lastDayPreviousMonth}
-        , tue: {current: false, day: lastDayPreviousMonth}
-        , wed: {current: true, day: firstDay'}
-        , thu: {current: true, day: succN 1 firstDay'}
-        , fri: {current: true, day: succN 2 firstDay'}
-        , sat: {current: true, day: succN 3 firstDay'}
-        }
-      Thursday ->
-        { sun: {current: false, day: predN 3 lastDayPreviousMonth}
-        , mon: {current: false, day: predN 2 lastDayPreviousMonth}
-        , tue: {current: false, day: predN 1 lastDayPreviousMonth}
-        , wed: {current: false, day: lastDayPreviousMonth}
-        , thu: {current: true, day: firstDay'}
-        , fri: {current: true, day: succN 1 firstDay'}
-        , sat: {current: true, day: succN 2 firstDay'}
-        }
-      Friday ->
-        { sun: {current: false, day: predN 4 lastDayPreviousMonth}
-        , mon: {current: false, day: predN 3 lastDayPreviousMonth}
-        , tue: {current: false, day: predN 2 lastDayPreviousMonth}
-        , wed: {current: false, day: predN 1 lastDayPreviousMonth}
-        , thu: {current: false, day: lastDayPreviousMonth}
-        , fri: {current: true, day: firstDay'}
-        , sat: {current: true, day: succ' firstDay'}
-        }
-      Saturday ->
-        { sun: {current: false, day: predN 5 lastDayPreviousMonth}
-        , mon: {current: false, day: predN 4 lastDayPreviousMonth}
-        , tue: {current: false, day: predN 3 lastDayPreviousMonth}
-        , wed: {current: false, day: predN 2 lastDayPreviousMonth}
-        , thu: {current: false, day: predN 1 lastDayPreviousMonth}
-        , fri: {current: false, day: lastDayPreviousMonth}
-        , sat: {current: true, day: firstDay'}
-        }
-      where
-        lastDayPreviousMonth :: Day
-        lastDayPreviousMonth = case m of
-          January -> lastDayOfMonth (pred' y) December
-          _ -> lastDayOfMonth y (pred' m)
-        firstDay' = day firstDay
-    buildWeek :: Day -> Week {current :: Boolean, day :: Day}
-    buildWeek n =
-      { sun: {current: true, day: n}
-      , mon: {current: true, day: succN 1 n}
-      , tue: {current: true, day: succN 2 n}
-      , wed: {current: true, day: succN 3 n}
-      , thu: {current: true, day: succN 4 n}
-      , fri: {current: true, day: succN 5 n}
-      , sat: {current: true, day: succN 6 n}
-      }
-    -- succ7 :: forall a. Enum a => a -> a
-    -- succ7 = fold $ replicate 7 succ'
-    succ' :: forall a. Enum a => a -> a
-    succ' x = unsafePartial (fromJust (succ x))
-    pred' :: forall a. Enum a => a -> a
-    pred' x = unsafePartial (fromJust (pred x))
-    succN :: forall a. Enum a => Int -> a -> a
-    succN n = runEndo (Array.fold (Array.replicate n (Endo succ')))
-    predN :: forall a. Enum a => Int -> a -> a
-    predN n = runEndo (Array.fold (Array.replicate n (Endo pred')))
-    runEndo :: forall a. Endo a -> a -> a
-    runEndo (Endo x) = x
