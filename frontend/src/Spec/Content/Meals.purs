@@ -10,7 +10,7 @@ import Data.Tuple (Tuple (..))
 import Data.Date (Date, month, year, day, canonicalDate, weekday, lastDayOfMonth)
 import Data.Date.Component (Month (January, December), Year, Weekday (..), Day)
 import Data.DateTime.Locale (LocalValue (..))
-import Data.Enum (class Enum, pred, succ, toEnum)
+import Data.Enum (class Enum, pred, succ, toEnum, fromEnum)
 import Data.Array as Array
 import Data.Unfoldable (unfoldr)
 import Control.Monad.Eff.Ref (REF)
@@ -128,7 +128,7 @@ spec = T.simpleSpec performAction render
                 let xs = getCalendar (year state.datepicked) (month state.datepicked)
                     week {sun,mon,tue,wed,thu,fri,sat} = tableRow {} $
                       let cell {current,day} =
-                            tableCell {padding: Table.dense} $ R.text (show day)
+                            tableCell {padding: Table.dense} $ R.text $ show $ fromEnum day
                       in  [ cell sun
                           , cell mon
                           , cell tue
