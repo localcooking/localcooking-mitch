@@ -6,11 +6,13 @@ import Prelude
 import Data.Monoid ((<>))
 import Data.Monoid.Endo (Endo (..))
 import Data.Maybe (Maybe (..), fromJust)
+import Data.Tuple (Tuple (..))
 import Data.Date (Date, month, year, day, canonicalDate, weekday, lastDayOfMonth)
 import Data.Date.Component (Month (January, December), Year, Weekday (..), Day)
 import Data.DateTime.Locale (LocalValue (..))
 import Data.Enum (class Enum, pred, succ, toEnum)
 import Data.Array as Array
+import Data.Unfoldable (unfoldr)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Now (nowDate)
 import Control.Monad.Eff.Uncurried (mkEffFn1)
@@ -44,6 +46,7 @@ import MaterialUI.Input as Input
 import MaterialUI.Chip (chip)
 import MaterialUI.Paper (paper)
 import MaterialUI.Table (table, tableRow, tableHead, tableCell, tableBody)
+import MaterialUI.Table as Table
 import MaterialUI.Collapse (collapse)
 import MaterialUI.Dialog (dialog)
 import MaterialUI.DialogTitle (dialogTitle)
@@ -125,9 +128,7 @@ spec = T.simpleSpec performAction render
                 let xs = getCalendar (year state.datepicked) (month state.datepicked)
                     week {sun,mon,tue,wed,thu,fri,sat} = tableRow {} $
                       let cell {current,day} =
-                            tableCell {} $
-                              typography {variant: Typography.subheading}
-                                [R.text (show day)]
+                            tableCell {padding: Table.dense} $ R.text (show day)
                       in  [ cell sun
                           , cell mon
                           , cell tue
@@ -138,13 +139,13 @@ spec = T.simpleSpec performAction render
                           ]
                 in  [ tableHead {}
                       [ tableRow {}
-                        [ tableCell {} $ R.text "Sun"
-                        , tableCell {} $ R.text "Mon"
-                        , tableCell {} $ R.text "Tue"
-                        , tableCell {} $ R.text "Wed"
-                        , tableCell {} $ R.text "Thu"
-                        , tableCell {} $ R.text "Fri"
-                        , tableCell {} $ R.text "Sat"
+                        [ tableCell {padding: Table.dense} $ R.text "Sun"
+                        , tableCell {padding: Table.dense} $ R.text "Mon"
+                        , tableCell {padding: Table.dense} $ R.text "Tue"
+                        , tableCell {padding: Table.dense} $ R.text "Wed"
+                        , tableCell {padding: Table.dense} $ R.text "Thu"
+                        , tableCell {padding: Table.dense} $ R.text "Fri"
+                        , tableCell {padding: Table.dense} $ R.text "Sat"
                         ]
                       ]
                     , tableBody {} (week <$> xs)
@@ -293,7 +294,10 @@ type Week a =
 getCalendar :: Year -> Month -> Array (Week {current :: Boolean, day :: Day})
 getCalendar y m =
   [ firstWeek
-  ] <> ( []
+  ] <> ( let go sunday
+               | sunday >= secondToLastWeekSunday = Nothing
+               | otherwise = Just (Tuple (buildWeek sunday) (succN 7 sunday))
+         in  unfoldr go secondWeekSunday
        )
     <>
   [ lastWeek
@@ -310,6 +314,15 @@ getCalendar y m =
       Saturday -> succN 1 x
       where
         x = day firstDay
+    secondToLastWeekSunday :: Day
+    secondToLastWeekSunday = case weekday (canonicalDate y m lastDay) of
+      Sunday -> predN 7 lastDay
+      Monday -> predN 8 lastDay
+      Tuesday -> predN 9 lastDay
+      Wednesday -> predN 10 lastDay
+      Thursday -> predN 11 lastDay
+      Friday -> predN 12 lastDay
+      Saturday -> predN 13 lastDay
     firstDay :: Date
     firstDay = canonicalDate y m $ unsafePartial $ fromJust $ toEnum 1
     lastDay :: Day
