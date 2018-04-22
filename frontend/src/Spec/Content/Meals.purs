@@ -61,12 +61,14 @@ type Effects eff =
 
 
 spec :: forall eff
-      . T.Spec (Effects eff) State Unit Action
-spec = T.simpleSpec performAction render
+      . { pickDate :: OneIO.IOQueues (Effects eff) Unit Date
+        }
+     -> T.Spec (Effects eff) State Unit Action
+spec {pickDate} = T.simpleSpec performAction render
   where
     performAction action props state = case action of
       ClickedOpenDatepicker -> do
-        date <- liftBase $ OneIO.callAsync pickDate unit
+        date <- liftBase (OneIO.callAsync pickDate unit)
         void $ T.cotransform _ { datepicked = date }
 
     render :: T.Render State Unit Action
@@ -184,7 +186,6 @@ spec = T.simpleSpec performAction render
         ]
       ]
 
-    pickDate = unsafePerformEff (OneIO.newIOQueues)
     today = unsafePerformEff $ do
       LocalValue _ d <- nowDate
       pure d
@@ -195,6 +196,7 @@ meals =
   let init =
         { initDatepicked: unsafePerformEff initDatepicked
         }
-      {spec: reactSpec, dispatcher} = T.createReactSpec spec (initialState init)
+      {spec: reactSpec, dispatcher} = T.createReactSpec (spec {pickDate}) (initialState init)
   in  R.createElement (R.createClass reactSpec) unit []
-
+  where
+    pickDate = unsafePerformEff OneIO.newIOQueues
