@@ -1,6 +1,6 @@
 module Server.Dependencies.Chef where
 
-import Types (AppM)
+-- import Types (AppM)
 
 import Web.Dependencies.Sparrow (Server, ServerContinue (..), ServerReturn (..))
 
