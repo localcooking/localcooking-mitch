@@ -3,6 +3,7 @@ module Main where
 import Links (SiteLinks (..), UserDetailsLinks (..), ImageLinks (Logo40Png), initSiteLinks)
 import Types.Env (env)
 import Colors (palette)
+import User (UserDetails (..))
 import Spec.Topbar.Buttons (topbarButtons)
 import Spec.Content (content)
 import Spec.Content.UserDetails (userDetails)
@@ -15,6 +16,7 @@ import LocalCooking.Spec.Icons.ChefHat (chefHatViewBox, chefHat)
 import Prelude
 import Data.Maybe (Maybe (..))
 import Data.UUID (GENUUID)
+import Control.Monad.Aff (sequential)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Now (NOW)
 import Control.Monad.Eff.Timer (TIMER)
@@ -156,6 +158,11 @@ main = do
       , content: \{currentPageSignal,siteLinks} ->
         [ userDetails {currentPageSignal,siteLinks}
         ]
+      , obtain: \getEmail -> do
+        mEmail <- sequential getEmail
+        case mEmail of
+          Nothing -> pure Nothing
+          Just email -> pure $ Just $ UserDetails {email}
       }
     , extendedNetwork:
       [ Button.withStyles
