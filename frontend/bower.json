@@ -22,7 +22,6 @@
     "purescript-websocket-moderate": "^2.0.1",
     "purescript-base64": "purescript-base64-2#^1.0.1",
     "purescript-globals": "^3.0.0",
-    "purescript-email-validate": "^2.0.0",
     "purescript-queue": "^4.1.0",
     "purescript-quickcheck": "^4.6.2"
   },
