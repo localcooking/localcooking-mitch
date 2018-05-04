@@ -249,8 +249,12 @@ instance fromLocationSiteLinks :: FromLocation SiteLinks where
             chefs = do
               void (string "chefs")
               pure ChefsLink -- FIXME search parameters or hierarchy
+            emailConfirm = do
+              void (string "emailConfirm")
+              pure EmailConfirmLink
         try meals
           <|> try chefs
+          <|> try emailConfirm
           <|> def
         where
           divider = void (char '/')
