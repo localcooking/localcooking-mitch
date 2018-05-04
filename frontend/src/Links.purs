@@ -141,6 +141,7 @@ data SiteLinks
   | ChefsLink -- FIXME search terms or hierarchy
   | RegisterLink -- FIXME authenticated vs unauthenticated?
   | UserDetailsLink (Maybe UserDetailsLinks)
+  | EmailConfirmLink
 
 instance arbitrarySiteLinks :: Arbitrary SiteLinks where
   arbitrary = oneOf $
@@ -150,6 +151,7 @@ instance arbitrarySiteLinks :: Arbitrary SiteLinks where
         , pure RegisterLink
         , do mUserDetails <- arbitrary
              pure (UserDetailsLink mUserDetails)
+        , pure EmailConfirmLink
         ]
 
 initSiteLinks :: forall eff
@@ -185,9 +187,12 @@ initSiteLinks = do
               case
                     StrMap.lookup "authToken" (StrMap.fromFoldable qs)
                 <|> StrMap.lookup "formData" (StrMap.fromFoldable qs)
+                <|> StrMap.lookup "emailToken" (StrMap.fromFoldable qs)
                 of
                 Nothing -> pure unit
-                Just _ -> replaceState' x h
+                Just _ -> flip replaceState' h $ case x of
+                  EmailConfirmLink -> RootLink
+                  _ -> x
           pure x
 
 derive instance genericSiteLinks :: Generic SiteLinks
@@ -204,6 +209,7 @@ instance toLocationSiteLinks :: ToLocation SiteLinks where
     MealsLink -> Location (Right $ rootDir </> file "meals") Nothing Nothing
     ChefsLink -> Location (Right $ rootDir </> file "chefs") Nothing Nothing
     RegisterLink -> Location (Right $ rootDir </> file "register") Nothing Nothing
+    EmailConfirmLink -> Location (Right $ rootDir </> file "emailConfirm") Nothing Nothing
     UserDetailsLink mUserDetails ->
       Location
         ( Right $ case mUserDetails of
