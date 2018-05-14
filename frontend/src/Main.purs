@@ -87,6 +87,7 @@ main = do
     , initSiteLinks: initSiteLink
     , palette
     , deps
+    , extraRedirect: \_ _ -> Nothing
     , leftDrawer:
       { buttons: \{toURI,siteLinks,currentPageSignal,windowSizeSignal,authTokenSignal} ->
         [ divider {}
