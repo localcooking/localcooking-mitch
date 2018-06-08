@@ -1,6 +1,6 @@
 module Links where
 
-import LocalCooking.Links.Class (class ToLocation, toLocation, class FromLocation, fromLocation, class LocalCookingSiteLinks, class LocalCookingUserDetailsLinks, replaceState', defaultSiteLinksPathParser)
+import LocalCooking.Global.Links.Class (class LocalCookingSiteLinks, class LocalCookingUserDetailsLinks, replaceState', defaultSiteLinksPathParser)
 
 import Prelude
 import Data.Maybe (Maybe (..), maybe)
@@ -8,7 +8,7 @@ import Data.Either (Either (..))
 import Data.URI (Query (..))
 import Data.URI.URI as URI
 import Data.URI.Path as URIPath
-import Data.URI.Location (Location (..), fromURI, printLocation)
+import Data.URI.Location (Location (..), fromURI, printLocation, class ToLocation, toLocation, class FromLocation, fromLocation)
 import Data.StrMap as StrMap
 import Data.Path.Pathy ((</>), dir, file, rootDir, Path, Rel, File, Sandboxed)
 import Data.Generic (class Generic, gEq, gShow)
@@ -176,7 +176,7 @@ initSiteLinks = do
         pure RootLink
       Just {location: location@(Location _ mQuery _)} -> case fromLocation location of
         Left e -> do
-          warn $ "Location can't be a SiteLinks: " <> e <> ", " <> show location
+          warn $ "Location can't be a SiteLinks: " <> e <> ", " <> printLocation location
           replaceState' RootLink h
           pure RootLink
         Right (x :: SiteLinks) -> do

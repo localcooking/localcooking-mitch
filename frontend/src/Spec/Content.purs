@@ -4,7 +4,6 @@ import Spec.Content.Root (root)
 import Spec.Content.Chefs (chefs)
 import Spec.Content.Meals (meals)
 import Links (SiteLinks (..))
-import LocalCooking.Window (WindowSize)
 
 import Prelude
 import Data.UUID (GENUUID)
@@ -17,6 +16,7 @@ import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Exception (EXCEPTION)
 
 import Thermite as T
+import DOM.HTML.Window.Extra (WindowSize)
 import React as R
 import React.DOM as R
 import React.DOM.Props as RP

@@ -1,12 +1,11 @@
 module Spec.Topbar.Buttons where
 
 import Links (SiteLinks (MealsLink, ChefsLink))
-import LocalCooking.Links.Class (toLocation)
 
 import Prelude
 import Data.URI (URI)
 import Data.URI.URI as URI
-import Data.URI.Location (Location)
+import Data.URI.Location (Location, toLocation)
 import Data.UUID (GENUUID)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)

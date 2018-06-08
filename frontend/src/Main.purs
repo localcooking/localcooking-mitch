@@ -1,21 +1,22 @@
 module Main where
 
 import Links (SiteLinks (..), UserDetailsLinks (..), ImageLinks (Logo40Png), initSiteLinks)
-import Types.Env (env)
 import Colors (palette)
 import User (UserDetails (..), PreUserDetails (..))
 import Spec.Topbar.Buttons (topbarButtons)
 import Spec.Content (content)
 import Spec.Content.UserDetails (userDetails)
-import LocalCooking.Links.Class (toLocation)
-import LocalCooking.Branding.Main (mainBrand)
+import LocalCooking.Types.ServerToClient (env)
+import LocalCooking.Spec.Misc.Branding (mainBrand)
+import LocalCooking.Spec.Misc.Icons.ChefHat (chefHatViewBox, chefHat)
 import LocalCooking.Main (defaultMain)
-import LocalCooking.Spec.Icons.ChefHat (chefHatViewBox, chefHat)
+import LocalCooking.Dependencies.Mitch (mitchDependencies, newMitchQueues)
 
 
 import Prelude
 import Data.Maybe (Maybe (..))
 import Data.UUID (GENUUID)
+import Data.URI.Location (toLocation)
 import Control.Monad.Aff (sequential)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Now (NOW)
@@ -77,16 +78,15 @@ main = do
 
   -- ( userDetailsEmailQueues :: UserEmailSparrowClientQueues Effects
   --   ) <- newSparrowStaticClientQueues
-  let deps = do
-        pure unit
-        -- unpackClient (Topic ["userDetails","email"]) $
-        --   sparrowStaticClientQueues userDetailsEmailQueues
+  -- let deps :: MitchQueues Effects -> SparrowClientT Effects (Eff Effects) Unit
+  --     deps = mitchDependencies
 
   defaultMain
     { env
     , initSiteLinks: initSiteLink
     , palette
-    , deps
+    , newSiteQueues: newMitchQueues
+    , deps: mitchDependencies
     , extraRedirect: \_ _ -> Nothing
     , leftDrawer:
       { buttons: \{toURI,siteLinks,currentPageSignal,windowSizeSignal,authTokenSignal} ->
@@ -159,10 +159,10 @@ main = do
       , content: \{currentPageSignal,siteLinks} ->
         [ userDetails {currentPageSignal,siteLinks}
         ]
-      , obtain: \{email,roles} -> do
-        PreUserDetails mEmail roles <- sequential $ PreUserDetails <$> email <*> roles
-        case mEmail of
-          Just email -> pure $ Just $ UserDetails {email,roles}
+      , obtain: \{user} -> do
+        PreUserDetails mUser <- sequential $ PreUserDetails <$> user
+        case mUser of
+          Just user -> pure $ Just $ UserDetails {user}
           _ -> pure Nothing
       }
     , extendedNetwork:
