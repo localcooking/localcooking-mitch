@@ -163,6 +163,7 @@ main = do
       , obtain: \{user} -> do
         liftEff $ log "is this shit even being called?"
         PreUserDetails mUser <- sequential $ PreUserDetails <$> user
+        liftEff $ log $ "but... not here? " <> show mUser
         case mUser of
           Just user -> pure $ Just $ UserDetails {user}
           _ -> pure Nothing
