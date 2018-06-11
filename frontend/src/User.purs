@@ -9,17 +9,15 @@ import Text.Email.Validate (EmailAddress)
 
 
 
-data PreUserDetails = PreUserDetails (Maybe User) -- (Maybe EmailAddress) (Array UserRole)
+data PreUserDetails = PreUserDetails (Maybe User)
 
 
 newtype UserDetails = UserDetails
   { user :: User
-  -- , roles :: Array UserRole
   }
 
 derive instance genericUserDetails :: Generic UserDetails
 
 instance userDetailsUserDetails :: UserDetails UserDetails where
   getUser (UserDetails {user}) = user
-  -- getEmailAddress (UserDetails {email}) = email
-  -- getUserRoles (UserDetails {roles}) = roles
+  setUser user (UserDetails x) = UserDetails x { user = user }
