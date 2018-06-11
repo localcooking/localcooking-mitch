@@ -19,6 +19,7 @@ import Data.UUID (GENUUID)
 import Data.URI.Location (toLocation)
 import Control.Monad.Aff (sequential)
 import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Now (NOW)
 import Control.Monad.Eff.Timer (TIMER)
 import Control.Monad.Eff.Exception (EXCEPTION)
@@ -160,6 +161,7 @@ main = do
         [ userDetails {currentPageSignal,siteLinks}
         ]
       , obtain: \{user} -> do
+        liftEff $ log "is this shit even being called?"
         PreUserDetails mUser <- sequential $ PreUserDetails <$> user
         case mUser of
           Just user -> pure $ Just $ UserDetails {user}
