@@ -10,7 +10,7 @@ This source repository depends on a number of support packages which are
 also accessed through our private repository - access to this one repo assumes
 access to the others. You're expected to have SSH keys registered in the gitlab server
 at [git.localcooking.com](https://git.localcooking.com) for TLS-enabled URIs a 'la
-`git@git.localcooking.com:team/project.git`.
+`git@git.localcooking.com:<team>/<project>.git`.
 
 
 ## Building
@@ -34,10 +34,10 @@ We're using the Node.js version `v8.10.0`, so run `nvm install v8.10.0` and `use
 #### Shared Libraries
 
 First, you'll need build tools and pkg-config for libsodium, and while we're at it, postgres's
-client library:
+client library and sphinx search:
 
 ```bash
-sudo apt install build-essential autoconf automake libtool pkg-config libpq-dev
+sudo apt install build-essential autoconf automake libtool pkg-config libpq-dev sphinxsearch
 ```
 
 After that, find a place to clone the lastest [libsodium](https://github.com/jedisct1/libsodium),
@@ -147,3 +147,14 @@ sudo systemctl status localcooking.service
 ```
 
 If not, open an issue.
+
+
+--------------------------------------------------------------------
+
+
+# Notes
+
+NGINX will need proper configuration - we've included most of it as localcooking-mitch.nginx.
+Futhermore, Sphinx will also need to be configured; there's another copy of it in this
+source tree as well. Lastly, we make use of systemd, so there's a localcooking.service file
+here too.
