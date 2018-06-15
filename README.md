@@ -37,7 +37,7 @@ First, you'll need build tools and pkg-config for libsodium, and while we're at 
 client library and sphinx search:
 
 ```bash
-sudo apt install build-essential autoconf automake libtool pkg-config libpq-dev sphinxsearch
+sudo apt install build-essential autoconf automake libtool pkg-config libpq-dev sphinxsearch libicu-dev
 ```
 
 After that, find a place to clone the lastest [libsodium](https://github.com/jedisct1/libsodium),
