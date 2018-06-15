@@ -15,8 +15,8 @@ import Control.Monad.Eff.Unsafe (unsafeCoerceEff, unsafePerformEff)
 
 import Thermite as T
 import DOM.HTML.Window.Extra (WindowSize (Laptop))
-import React as R
-import React.DOM as R
+import React (ReactElement, createClass, createElement) as R
+import React.DOM (div, em, img, strong, text) as R
 import React.DOM.Props as RP
 import React.Signal.WhileMounted as Signal
 import React.DOM.Props.PreventDefault (preventDefault)

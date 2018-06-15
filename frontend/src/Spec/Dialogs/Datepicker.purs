@@ -16,9 +16,8 @@ import Control.Monad.Eff.Unsafe (unsafePerformEff, unsafeCoerceEff)
 import Partial.Unsafe (unsafePartial)
 
 import Thermite as T
-import React as R
-import React.DOM as R
-import React.DOM.Props as RP
+import React (ReactElement, createClass, createElement) as R
+import React.DOM (text) as R
 import React.Queue.WhileMounted as Queue
 
 import MaterialUI.Types (createStyles)
@@ -218,3 +217,26 @@ initDatepicked :: forall eff. Eff (now :: NOW | eff) Date
 initDatepicked = do
   LocalValue _ d <- nowDate
   pure (plusTwoWeeks d)
+
+
+
+-- TODO not a generic dialog, because clicking a date closes...?
+-- datepicker :: forall eff
+--             . LocalCookingParams SiteLinks UserDetails (Effects eff)
+--            -> { datepickerQueue :: One.IO (Effects eff) Unit Date
+--               }
+--            -> R.ReactElement
+-- datepicker params {datepickerQueue} =
+--   genericDialog
+--   params
+--   { dialogQueue: datepickerQueue
+--   , closeQueue: Nothing
+--   , buttons: \{close} ->
+--     [ button
+--       { variant: Button.flat
+--       , onTouchTap: mkEffFn1 \_ -> close
+--       } [R.text "Close"]
+--     ]
+--   , title: "Pick Date"
+--   , submitValue: 
+--   }

@@ -1,7 +1,6 @@
 module Data.Date.Extra where
 
 import Prelude
-import Data.Monoid ((<>))
 import Data.Monoid.Endo (Endo (..))
 import Data.Maybe (Maybe (..), fromJust)
 import Data.Tuple (Tuple (..))

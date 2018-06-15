@@ -6,7 +6,6 @@ import LocalCooking.Semantics.Common (User)
 import Prelude
 import Data.Maybe (Maybe)
 import Data.Generic (class Generic, gShow)
-import Text.Email.Validate (EmailAddress)
 
 
 

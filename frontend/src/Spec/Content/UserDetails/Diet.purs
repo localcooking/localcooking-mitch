@@ -3,8 +3,8 @@ module Spec.Content.UserDetails.Diet where
 import Prelude
 
 import Thermite as T
-import React as R
-import React.DOM as R
+import React (ReactElement, createClass, createElement) as R
+import React.DOM (text) as R
 
 
 type State = Unit

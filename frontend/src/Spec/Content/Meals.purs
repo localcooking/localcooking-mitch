@@ -6,7 +6,7 @@ import Spec.Dialogs.Datepicker (datepicker, initDatepicked)
 import Prelude
 import Data.Maybe (Maybe (..))
 import Data.Date (Date, diff)
-import Data.Date.Extra (humanReadableDuration, plusTwoWeeks)
+import Data.Date.Extra (humanReadableDuration)
 import Data.Time.Duration (Days (..), Milliseconds (..))
 import Data.DateTime.Locale (LocalValue (..))
 import Data.Int as Int
@@ -19,8 +19,8 @@ import Control.Monad.Eff.Uncurried (mkEffFn1)
 import Control.Monad.Eff.Unsafe (unsafePerformEff)
 
 import Thermite as T
-import React as R
-import React.DOM as R
+import React (ReactElement, createClass, createElement) as R
+import React.DOM (br, div, text) as R
 import React.DOM.Props as RP
 
 import MaterialUI.Types (createStyles)

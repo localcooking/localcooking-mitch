@@ -1,17 +1,16 @@
 module Spec.Tag where
 
 import Prelude
-
-import Thermite as T
-import React as R
-import React.DOM as R
-import React.DOM.Props as RP
 import Data.Maybe (Maybe (..))
 import Data.Tuple (Tuple (..))
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Uncurried (mkEffFn1)
 import Control.Monad.Eff.Unsafe (unsafeCoerceEff)
 import Control.Monad.Eff.Ref (REF)
+
+import Thermite as T
+import React (ReactElement, createClass, createElement) as R
+import React.DOM (text) as R
 
 import MaterialUI.Types (createStyles)
 import MaterialUI.Chip (chip)

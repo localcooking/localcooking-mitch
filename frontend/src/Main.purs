@@ -20,7 +20,6 @@ import Data.URI.Location (toLocation)
 import Data.Argonaut.JSONUnit (JSONUnit (..))
 import Control.Monad.Aff (sequential)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Now (NOW)
 import Control.Monad.Eff.Timer (TIMER)
 import Control.Monad.Eff.Exception (EXCEPTION)
@@ -30,10 +29,7 @@ import Control.Monad.Eff.Uncurried (mkEffFn1)
 import Control.Monad.Eff.Unsafe (unsafeCoerceEff)
 import Control.Execution.Immediate (SET_IMMEDIATE_SHIM)
 
-import React as R
-import React.DOM as R
-import React.DOM.SVG as RS
-import React.DOM.Props as RP
+import React.DOM (text) as R
 import MaterialUI.InjectTapEvent (INJECT_TAP_EVENT)
 import MaterialUI.Divider (divider)
 import MaterialUI.Types (createStyles)
@@ -108,10 +104,12 @@ main = do
   let searchMealTagDeltaIn :: String -> Eff Effects Unit
       searchMealTagDeltaIn = One.putQueue searchMealTagsDeltaInQueue
 
-      searchMealTagInitIn :: JSONUnit -> Eff Effects Unit
-      searchMealTagInitIn = One.putQueue searchMealTagsInitInQueue
+      -- searchMealTagInitIn :: JSONUnit -> Eff Effects Unit
+      -- searchMealTagInitIn = One.putQueue searchMealTagsInitInQueue
       -- FIXME invoke immediately?
 
+
+  One.putQueue searchMealTagsInitInQueue JSONUnit
 
 
   defaultMain
@@ -193,9 +191,7 @@ main = do
         [ userDetails {currentPageSignal,siteLinks}
         ]
       , obtain: \{user} -> do
-        liftEff $ log "is this shit even being called?"
         PreUserDetails mUser <- sequential $ PreUserDetails <$> user
-        liftEff $ log $ "but... not here? " <> show mUser
         case mUser of
           Just user -> pure $ Just $ UserDetails {user}
           _ -> pure Nothing

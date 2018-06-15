@@ -3,8 +3,8 @@ module Spec.Content.Chefs where
 import Prelude
 
 import Thermite as T
-import React as R
-import React.DOM as R
+import React (ReactElement, createClass, createElement) as R
+import React.DOM (div, text) as R
 import React.DOM.Props as RP
 
 import MaterialUI.Typography (typography)

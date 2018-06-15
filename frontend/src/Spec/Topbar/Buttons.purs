@@ -15,10 +15,8 @@ import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Exception (EXCEPTION)
 
 import Thermite as T
-import React as R
-import React.DOM as R
-import React.DOM.SVG as RS
-import React.DOM.Props as RP
+import React (ReactElement, createClass, createElement) as R
+import React.DOM (text) as R
 import React.DOM.Props.PreventDefault (preventDefault)
 import React.Signal.WhileMounted as Signal
 

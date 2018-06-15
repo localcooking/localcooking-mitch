@@ -10,24 +10,21 @@ import Data.UUID (GENUUID)
 import Data.URI (URI)
 import Data.URI.Location (Location)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE, log)
+import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Unsafe (unsafeCoerceEff, unsafePerformEff)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Exception (EXCEPTION)
 
 import Thermite as T
 import DOM.HTML.Window.Extra (WindowSize)
-import React as R
-import React.DOM as R
-import React.DOM.Props as RP
+import React (ReactElement, createClass, createElement) as R
+import React.DOM (text) as R
 import React.Signal.WhileMounted as Signal
 
 import Crypto.Scrypt (SCRYPT)
 
 import IxSignal.Internal (IxSignal)
 import IxSignal.Internal as IxSignal
-import Partial.Unsafe (unsafePartial)
-import Unsafe.Coerce (unsafeCoerce)
 
 
 
