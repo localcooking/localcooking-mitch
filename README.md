@@ -34,10 +34,10 @@ We're using the Node.js version `v8.10.0`, so run `nvm install v8.10.0` and `use
 #### Shared Libraries
 
 First, you'll need build tools and pkg-config for libsodium, and while we're at it, postgres's
-client library and sphinx search:
+client library, sphinx search, and imagemagick:
 
 ```bash
-sudo apt install build-essential autoconf automake libtool pkg-config libpq-dev sphinxsearch libicu-dev
+sudo apt install build-essential autoconf automake libtool pkg-config libpq-dev sphinxsearch libicu-dev imagemagick
 ```
 
 After that, find a place to clone the lastest [libsodium](https://github.com/jedisct1/libsodium),
