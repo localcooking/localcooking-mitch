@@ -1,6 +1,6 @@
 module Spec.Content.Root where
 
-import Links (SiteLinks (RegisterLink), AboutPageLinks (..))
+import Links (SiteLinks (RegisterLink, MealsLink, ChefsLink), AboutPageLinks (..))
 
 import Prelude
 import Data.UUID (GENUUID)
@@ -81,7 +81,7 @@ spec {toURI,siteLinks} = T.simpleSpec performAction render
         , align: Typography.right
         , color: Typography.primary
         , style: createStyles {marginBottom: "1em"}
-        } [R.text "Locally Sourced Cuisine for Average Families"]
+        } [R.text "Locally Sourced Cuisine for Working Families"]
       ] <> ( if state.windowSize < Laptop
                 then paragraph1 {toURI,siteLinks}
                 else
@@ -110,26 +110,28 @@ spec {toURI,siteLinks} = T.simpleSpec performAction render
         , color: Typography.primary
         , style: createStyles {marginBottom: "1em", marginTop: "1em"}
         } [R.text "Simple Personalized Ordering"]
-      , if state.windowSize < Laptop
-          then paragraph2
-          else
-            grid
-              { spacing: Grid.spacing8
-              , container: true
-              }
-              [ grid {xs: 4, item: true}
-                [ R.img
-                  [ RP.src $ URI.print $ toURI $ toLocation Paragraph2Png
-                  , RP.style {width: "100%", marginBottom: "1em", borderRadius: "0.2em"}
-                  ] []
-                ]
-              , grid {xs: 8, item: true}
-                [ R.div [RP.style {marginTop: "1em"}] []
-                , paragraph2
-                , R.div [RP.style {marginBottom: "1em"}] []
-                ]
-              ]
-      , divider {}
+      ] <> ( if state.windowSize < Laptop
+                then paragraph2
+                else
+                  [ grid
+                    { spacing: Grid.spacing8
+                    , container: true
+                    }
+                    [ grid {xs: 4, item: true}
+                      [ R.img
+                        [ RP.src $ URI.print $ toURI $ toLocation Paragraph2Png
+                        , RP.style {width: "100%", marginBottom: "1em", borderRadius: "0.2em"}
+                        ] []
+                      ]
+                    , grid {xs: 8, item: true} $
+                      [ R.div [RP.style {marginTop: "1em"}] []
+                      ] <> paragraph2 <>
+                      [ R.div [RP.style {marginBottom: "1em"}] []
+                      ]
+                    ]
+                  ]
+           ) <>
+      [ divider {}
       , typography
         { variant: if state.windowSize < Laptop then Typography.headline else Typography.display1
         , align: Typography.right
@@ -193,27 +195,42 @@ paragraph1 {toURI,siteLinks} =
     , paragraph: true
     , style: createStyles {textIndent: "3em"}
     }
-    [ R.text "We are a team of chefs dedicated to providing hand-made, healthy, creative meals to the public at competitive prices. Our platform allows chefs to debut "
+    [ R.text "Local Cooking is a marketplace for individual chefs, dedicated to providing hand-made, healthy, creative meals to the public at competitive prices. Our platform allows chefs to showcase "
     , R.strong [] [R.text "their own"]
-    , R.text " menus and feature "
-    , R.strong [] [R.text "their own"]
-    , R.text " culinary artistry — search for a specific dish, or for a style of talent."
+    , R.text " menus and culinary artistry — customers can search for a specific dish, or for a style of talent through our app."
     ]
   , typography
     { variant: Typography.body1
     , align: Typography.left
     , style: createStyles {textIndent: "3em"}
     }
-    [ R.text "Our chefs are paid by commission; they receive the majority of profit on every order, while our app gives them an opportunity to reach more customers, looking for their type of cuisine. We want to make the experience of ordering a hand-cooked meal "
+    [ R.text "Our chefs are paid on an order-by-order basis, as independent contractors; they receive the majority of profit on every order, while our app allows them reach more customers and maintain their own portfolio. We want to make the experience of ordering a hand-cooked meal "
     , R.em [] [R.text "personal"]
-    , R.text ", yet "
+    , R.text " again, yet "
     , R.em [] [R.text "streamlined"]
-    , R.text " enough to meet the needs of our modern world."
+    , R.text " to meet the needs of our modern world."
     ]
   , R.div [RP.style {textAlign: "right"}]
     [ button
+      { href: URI.print $ toURI $ toLocation MealsLink
+      , color: Button.primary
+      , onClick: mkEffFn1 preventDefault
+      , onTouchTap: mkEffFn1 \e -> do
+        preventDefault e
+        unsafeCoerceEff (siteLinks MealsLink)
+      } [R.text "Browse Meals"]
+    , button
+      { href: URI.print $ toURI $ toLocation ChefsLink
+      , color: Button.secondary
+      , onClick: mkEffFn1 preventDefault
+      , onTouchTap: mkEffFn1 \e -> do
+        preventDefault e
+        unsafeCoerceEff (siteLinks ChefsLink)
+      } [R.text "Browse Chefs"]
+    , button
       { href: URI.print $ toURI $ toLocation RegisterLink
       , color: Button.primary
+      , variant: Button.raised
       , onClick: mkEffFn1 preventDefault
       , onTouchTap: mkEffFn1 \e -> do
         preventDefault e
@@ -224,32 +241,42 @@ paragraph1 {toURI,siteLinks} =
 
 
 -- FIXME links!!
-paragraph2 :: R.ReactElement
-paragraph2 = list {dense: true}
-  [ listItem {}
-    [ listItemIcon {} searchIcon
-    , listItemText
-      {primary: "Browse our Chefs and Menus"}
+paragraph2 :: Array R.ReactElement
+paragraph2 =
+  [ typography
+    { variant: Typography.body1
+    , align: Typography.left
+    , style: createStyles {textIndent: "3em"}
+    , paragraph: true
+    }
+    [ R.text "The process of ordering a meal is pretty simple:"
     ]
-  , listItem {}
-    [ listItemIcon {} pictureInPictureIcon
-    , listItemText
-      {primary: "View the details on specific meals — the ingredients, the culture and history, and how to prepare it"}
-    ]
-  , listItem {}
-    [ listItemIcon {} shoppingCartIcon
-    , listItemText
-      {primary: "Create an order of at least $100, at least two weeks in advance"}
-    ]
-  , listItem {}
-    [ listItemIcon {} timelapseIcon
-    , listItemText
-      {primary: "Checkout your cart, wait for updates on your order"}
-    ]
-  , listItem {}
-    [ listItemIcon {} localShippingIcon
-    , listItemText
-      {primary: "Receive your delivery of frozen meals, store them, or prepare and enjoy!"}
+  , list {dense: true}
+    [ listItem {}
+      [ listItemIcon {} searchIcon
+      , listItemText
+        {primary: "Browse our Chefs and Menus"}
+      ]
+    , listItem {}
+      [ listItemIcon {} pictureInPictureIcon
+      , listItemText
+        {primary: "View the details on specific meals — the ingredients, the culture and history, and how to prepare it"}
+      ]
+    , listItem {}
+      [ listItemIcon {} shoppingCartIcon
+      , listItemText
+        {primary: "Add meals to your cart, ordering before the chef's chosen deadline (so they have enough time to care for everyone's meals)"}
+      ]
+    , listItem {}
+      [ listItemIcon {} timelapseIcon
+      , listItemText
+        {primary: "Checkout your cart, wait for updates on your order"}
+      ]
+    , listItem {}
+      [ listItemIcon {} localShippingIcon
+      , listItemText
+        {primary: "Receive your delivery of frozen meals; store them, or prepare and enjoy!"}
+      ]
     ]
   ]
 
@@ -262,9 +289,7 @@ paragraph3 =
     , style: createStyles {textIndent: "3em"}
     , paragraph: true
     }
-    [ R.text "Every chef has a "
-    , R.em [] [R.text "bi-weekly"]
-    , R.text " schedule, and every order must be filed at least two weeks in advance — each menu has its own shipping date, and each chef has their own planned schedule to fill their orders. This allows chefs to "
+    [ R.text "Every chef gets to decide their own schedule and deadline — each menu has its own shipping date, and each chef has their own work schedule to fill their orders in bulk. This allows chefs to "
     , R.em [] [R.text "care"]
     , R.text " about each meal and give their full attention to their craft, without having to worry about wasteful time constraints. Each chef:"
     ]
@@ -272,17 +297,17 @@ paragraph3 =
     [ listItem {}
       [ listItemIcon {} restaurantMenuIcon
       , listItemText
-        {primary: "Manages their own work schedule"}
+        {primary: "Manages their own work schedule and kitchen time"}
       ]
     , listItem {}
       [ listItemIcon {} restaurantMenuIcon
       , listItemText
-        {primary: "Creates their own menus and portfolio"}
+        {primary: "Creates their own menus, with their own deadlines"}
       ]
     , listItem {}
       [ listItemIcon {} restaurantMenuIcon
       , listItemText
-        {primary: "Builds their own consumer base and market"}
+        {primary: "Builds their own consumer base and reputation"}
       ]
     ]
   ]
