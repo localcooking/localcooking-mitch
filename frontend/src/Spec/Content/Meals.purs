@@ -1,6 +1,6 @@
 module Spec.Content.Meals where
 
-import Spec.Tag (tag)
+import LocalCooking.Spec.Tag (tag, TagVariant (..))
 import Spec.Dialogs.Datepicker (datepicker, initDatepicked)
 
 import Prelude
@@ -131,17 +131,62 @@ spec {pickDate} = T.simpleSpec performAction render
                 , overflowY: "hidden"
                 , padding: "0.5em"
                 }
-              ] $
-              map (\label -> tag {label,onClick: Just (pure unit), onDelete: Nothing})
-                [ "One"
-                , "Two"
-                , "Three"
-                , "Four"
-                , "Foo"
-                , "Bar"
-                , "Baz"
-                , "Qux"
-                ]
+              ]
+              [ tag
+                { onClick: Just (pure unit)
+                , onDelete: Nothing
+                , variant: TagDiet
+                , label: "Paleo"
+                }
+              , tag
+                { onClick: Just (pure unit)
+                , onDelete: Nothing
+                , variant: TagDiet
+                , label: "Vegan"
+                }
+              , tag
+                { onClick: Just (pure unit)
+                , onDelete: Nothing
+                , variant: TagDiet
+                , label: "Gluten Free"
+                }
+              , tag
+                { onClick: Just (pure unit)
+                , onDelete: Nothing
+                , variant: TagIngredient
+                , label: "Ginger"
+                }
+              , tag
+                { onClick: Just (pure unit)
+                , onDelete: Nothing
+                , variant: TagMeal
+                , label: "Curry"
+                }
+              , tag
+                { onClick: Just (pure unit)
+                , onDelete: Nothing
+                , variant: TagIngredient
+                , label: "Seafood"
+                }
+              , tag
+                { onClick: Just (pure unit)
+                , onDelete: Nothing
+                , variant: TagDiet
+                , label: "Raw"
+                }
+              , tag
+                { onClick: Just (pure unit)
+                , onDelete: Nothing
+                , variant: TagCulture
+                , label: "German"
+                }
+              , tag
+                { onClick: Just (pure unit)
+                , onDelete: Nothing
+                , variant: TagCulture
+                , label: "Nepalese"
+                }
+              ]
             , divider {}
             , typography
               { variant: Typography.subheading
@@ -185,13 +230,32 @@ spec {pickDate} = T.simpleSpec performAction render
               , marginBottom: "1em"
               , display: "flex"
               }
-            } $
-            map (\label -> tag {label,onDelete: Just (pure unit), onClick: Nothing})
-              [ "One"
-              , "Two"
-              , "Three"
-              , "Four"
-              ]
+            }
+            [ tag
+              { onDelete: Just (pure unit)
+              , onClick: Nothing
+              , variant: TagDiet
+              , label: "Vegitarian"
+              }
+            , tag
+              { onDelete: Just (pure unit)
+              , onClick: Nothing
+              , variant: TagIngredient
+              , label: "Parmesan"
+              }
+            , tag
+              { onDelete: Just (pure unit)
+              , onClick: Nothing
+              , variant: TagCulture
+              , label: "Hebrew"
+              }
+            , tag
+              { onDelete: Just (pure unit)
+              , onClick: Nothing
+              , variant: TagMeal
+              , label: "Pasta"
+              }
+            ]
           , grid {container: true, spacing: Grid.spacing8}
             [ grid {item: true, xs: 4}
               [ paper {style: createStyles {width: "100%", padding: "0.5em"}}
