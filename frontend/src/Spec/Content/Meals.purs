@@ -20,7 +20,7 @@ import Control.Monad.Eff.Unsafe (unsafePerformEff)
 
 import Thermite as T
 import React (ReactElement, createClass, createElement) as R
-import React.DOM (br, div, text) as R
+import React.DOM (br, div, text, em) as R
 import React.DOM.Props as RP
 
 import MaterialUI.Types (createStyles)
@@ -256,18 +256,21 @@ spec {pickDate} = T.simpleSpec performAction render
               , label: "Pasta"
               }
             ]
-          , grid {container: true, spacing: Grid.spacing8}
-            [ grid {item: true, xs: 4}
-              [ paper {style: createStyles {width: "100%", padding: "0.5em"}}
-                [ typography
-                  { variant: Typography.headline
-                  } [R.text "Wienerschnitzel"]
-                , typography
-                  { variant: Typography.body1
-                  } [R.text "Foo"]
-                ]
-              ]
-            ]
+          , typography
+            { variant: Typography.headline
+            } [R.em [] [R.text "Under Construction"]]
+            -- grid {container: true, spacing: Grid.spacing8}
+            -- [ grid {item: true, xs: 4}
+            --   [ paper {style: createStyles {width: "100%", padding: "0.5em"}}
+            --     [ typography
+            --       { variant: Typography.headline
+            --       } [R.text "Wienerschnitzel"]
+            --     , typography
+            --       { variant: Typography.body1
+            --       } [R.text "Foo"]
+            --     ]
+            --   ]
+            -- ]
           ]
         ]
       ]
