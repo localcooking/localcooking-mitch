@@ -134,7 +134,7 @@ spec
         { color: Button.secondary
         , variant: Button.raised
         , size: Button.large
-        , style: createStyles {marginTop: "1em"}
+        , style: createStyles {marginTop: "1em", float: "right"}
         , disabledSignal: submit.disabledSignal
         , triggerQueue: submit.queue
         } [R.text "Submit"]
