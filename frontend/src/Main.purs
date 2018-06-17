@@ -187,8 +187,8 @@ main = do
             ]
         , divider {}
         ]
-      , content: \{currentPageSignal,siteLinks} ->
-        [ userDetails {currentPageSignal,siteLinks}
+      , content: \params ->
+        [ userDetails params
         ]
       , obtain: \{user} -> do
         PreUserDetails mUser <- sequential $ PreUserDetails <$> user

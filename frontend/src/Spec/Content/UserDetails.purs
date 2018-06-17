@@ -1,15 +1,19 @@
 module Spec.Content.UserDetails where
 
 import Links (SiteLinks (UserDetailsLink), UserDetailsLinks (..))
+import User (UserDetails)
 import Spec.Content.UserDetails.General (general)
 import Spec.Content.UserDetails.Orders (orders)
 import Spec.Content.UserDetails.Diet (diet)
 import Spec.Content.UserDetails.Allergies (allergies)
+import LocalCooking.Thermite.Params (LocalCookingParams, LocalCookingState, initLocalCookingState, performActionLocalCooking, LocalCookingAction, whileMountedLocalCooking)
 
 import Prelude
+import Data.Lens (Lens', Prism', lens, prism')
 
 import Thermite as T
 import React (ReactElement, createClass, createElement) as R
+import React.DOM (text) as R
 import React.Signal.WhileMounted as Signal
 
 import Data.Maybe (Maybe (..))
@@ -25,16 +29,16 @@ import Partial.Unsafe (unsafePartial)
 
 
 type State =
-  { page :: SiteLinks
+  { localCooking :: LocalCookingState SiteLinks UserDetails
   }
 
-initialState :: {initSiteLinks :: SiteLinks} -> State
-initialState {initSiteLinks} =
-  { page: initSiteLinks
+initialState :: LocalCookingState SiteLinks UserDetails -> State
+initialState localCooking =
+  { localCooking
   }
 
 data Action
-  = ChangedCurrentPage SiteLinks
+  = LocalCookingAction (LocalCookingAction SiteLinks UserDetails)
 
 type Effects eff =
   ( ref :: REF
@@ -43,24 +47,28 @@ type Effects eff =
   | eff)
 
 
+getLCState :: Lens' State (LocalCookingState SiteLinks UserDetails)
+getLCState = lens (_.localCooking) (_ { localCooking = _ })
+
+
 spec :: forall eff
-      . { siteLinks :: SiteLinks -> Eff (Effects eff) Unit
-        }
+      . LocalCookingParams SiteLinks UserDetails (Effects eff)
      -> T.Spec (Effects eff) State Unit Action
-spec {siteLinks} = T.simpleSpec performAction render
+spec params = T.simpleSpec performAction render
   where
     performAction action props state = case action of
-      ChangedCurrentPage x -> void $ T.cotransform _ { page = x }
+      LocalCookingAction a -> performActionLocalCooking getLCState a props state
 
     render :: T.Render State Unit Action
     render dispatch props state children =
         [ unsafePartial $
-          case state.page of -- TODO pack currentPageSignal listener to this level, so
-                             -- side buttons aren't redrawn
+          case state.localCooking.currentPage of
+            -- TODO pack currentPageSignal listener to this level, so
+            -- side buttons aren't redrawn
             UserDetailsLink mUserDetails -> case mUserDetails of
-              Nothing -> general
+              Nothing -> general params
               Just x -> case x of
-                UserDetailsGeneralLink -> general
+                UserDetailsGeneralLink -> general params
                 UserDetailsOrdersLink -> orders
                 UserDetailsDietLink -> diet
                 UserDetailsAllergiesLink -> allergies
@@ -68,18 +76,18 @@ spec {siteLinks} = T.simpleSpec performAction render
 
 
 userDetails :: forall eff
-             . { currentPageSignal :: IxSignal (Effects eff) SiteLinks
-               , siteLinks :: SiteLinks -> Eff (Effects eff) Unit
-               }
+             . LocalCookingParams SiteLinks UserDetails (Effects eff)
             -> R.ReactElement
-userDetails {currentPageSignal,siteLinks} =
-  let init =
-        { initSiteLinks: unsafePerformEff $ IxSignal.get currentPageSignal
-        }
-      {spec: reactSpec, dispatcher} = T.createReactSpec (spec {siteLinks}) (initialState init)
+userDetails params =
+  let {spec: reactSpec, dispatcher} =
+        T.createReactSpec
+          ( spec params
+          ) (initialState (unsafePerformEff (initLocalCookingState params)))
       reactSpec' =
-        Signal.whileMountedIxUUID
-          currentPageSignal
-          (\this x -> unsafeCoerceEff $ dispatcher this (ChangedCurrentPage x))
+          whileMountedLocalCooking
+            params
+            "Spec.Content.UserDetails"
+            LocalCookingAction
+            (\this -> unsafeCoerceEff <<< dispatcher this)
         reactSpec
   in  R.createElement (R.createClass reactSpec') unit []
