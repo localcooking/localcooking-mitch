@@ -5,10 +5,12 @@ import User (UserDetails)
 import Spec.Icons.NewPerson (newPerson)
 import LocalCooking.Spec.Common.Pending (pending)
 import LocalCooking.Spec.Common.Form.Name as Name
+import LocalCooking.Spec.Common.Form.Address as Address
 import LocalCooking.Spec.Common.Form.Submit as Submit
 import LocalCooking.Thermite.Params (LocalCookingState, initLocalCookingState, LocalCookingAction, LocalCookingParams, whileMountedLocalCooking, performActionLocalCooking)
 
 import Prelude
+import Data.Address (USAAddress (..), USAState (CO))
 import Data.Lens (Lens', Prism', lens, prism')
 import Data.UUID (GENUUID)
 import Control.Monad.Eff.Ref (REF)
@@ -69,6 +71,11 @@ spec :: forall eff
           , updatedQueue :: IxQueue (read :: READ) (Effects eff) Unit
           , setQueue     :: One.Queue (write :: WRITE) (Effects eff) Name.NameState
           }
+        , address ::
+          { signal       :: IxSignal (Effects eff) USAAddress
+          , updatedQueue :: IxQueue (read :: READ) (Effects eff) Unit
+          , setQueue     :: One.Queue (write :: WRITE) (Effects eff) USAAddress
+          }
         , submit ::
           { queue          :: IxQueue (read :: READ) (Effects eff) Unit
           , disabledSignal :: IxSignal (Effects eff) Boolean
@@ -78,6 +85,7 @@ spec :: forall eff
      -> T.Spec (Effects eff) State Unit Action
 spec
   { name
+  , address
   , submit
   , pendingSignal
   } = T.simpleSpec performAction render
@@ -130,6 +138,11 @@ spec
         , updatedQueue: name.updatedQueue
         , setQueue: name.setQueue
         }
+      , Address.address
+        { addressSignal: address.signal
+        , updatedQueue: address.updatedQueue
+        , setQueue: address.setQueue
+        }
       , Submit.submit
         { color: Button.secondary
         , variant: Button.raised
@@ -155,6 +168,11 @@ general params =
               { signal: nameSignal
               , updatedQueue: nameUpdatedQueue
               , setQueue: nameSetQueue
+              }
+            , address:
+              { signal: addressSignal
+              , updatedQueue: addressUpdatedQueue
+              , setQueue: addressSetQueue
               }
             , submit:
               { queue: submitQueue
@@ -190,6 +208,9 @@ general params =
     nameSignal = unsafePerformEff $ IxSignal.make $ Name.NamePartial ""
     nameUpdatedQueue = unsafePerformEff $ readOnly <$> IxQueue.newIxQueue
     nameSetQueue = unsafePerformEff $ writeOnly <$> One.newQueue
+    addressSignal = unsafePerformEff $ IxSignal.make $ USAAddress {street: "", city: "", state: CO, zip: 80401}
+    addressUpdatedQueue = unsafePerformEff $ readOnly <$> IxQueue.newIxQueue
+    addressSetQueue = unsafePerformEff $ writeOnly <$> One.newQueue
     pendingSignal = unsafePerformEff (IxSignal.make false)
     submitQueue = unsafePerformEff $ readOnly <$> IxQueue.newIxQueue
     submitDisabledSignal = unsafePerformEff (IxSignal.make true)
