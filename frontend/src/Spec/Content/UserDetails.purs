@@ -61,8 +61,7 @@ spec params = T.simpleSpec performAction render
 
     render :: T.Render State Unit Action
     render dispatch props state children =
-        [ unsafePartial $
-          case state.localCooking.currentPage of
+        [ case state.localCooking.currentPage of
             -- TODO pack currentPageSignal listener to this level, so
             -- side buttons aren't redrawn
             UserDetailsLink mUserDetails -> case mUserDetails of
@@ -72,6 +71,8 @@ spec params = T.simpleSpec performAction render
                 UserDetailsOrdersLink -> orders
                 UserDetailsDietLink -> diet
                 UserDetailsAllergiesLink -> allergies
+                _ -> R.text ""
+            _ -> R.text ""
         ]
 
 
