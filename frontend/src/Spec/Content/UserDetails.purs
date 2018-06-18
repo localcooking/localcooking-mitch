@@ -7,6 +7,7 @@ import Spec.Content.UserDetails.Orders (orders)
 import Spec.Content.UserDetails.Diet (diet)
 import Spec.Content.UserDetails.Allergies (allergies)
 import LocalCooking.Thermite.Params (LocalCookingParams, LocalCookingState, initLocalCookingState, performActionLocalCooking, LocalCookingAction, whileMountedLocalCooking)
+import LocalCooking.Dependencies.Mitch (GetCustomerSparrowClientQueues, SetCustomerSparrowClientQueues)
 
 import Prelude
 import Data.Lens (Lens', Prism', lens, prism')
@@ -53,8 +54,11 @@ getLCState = lens (_.localCooking) (_ { localCooking = _ })
 
 spec :: forall eff
       . LocalCookingParams SiteLinks UserDetails (Effects eff)
+     -> { getCustomerQueues :: GetCustomerSparrowClientQueues (Effects eff)
+        , setCustomerQueues :: SetCustomerSparrowClientQueues (Effects eff)
+        }
      -> T.Spec (Effects eff) State Unit Action
-spec params = T.simpleSpec performAction render
+spec params {getCustomerQueues,setCustomerQueues} = T.simpleSpec performAction render
   where
     performAction action props state = case action of
       LocalCookingAction a -> performActionLocalCooking getLCState a props state
@@ -65,9 +69,9 @@ spec params = T.simpleSpec performAction render
             -- TODO pack currentPageSignal listener to this level, so
             -- side buttons aren't redrawn
             UserDetailsLink mUserDetails -> case mUserDetails of
-              Nothing -> general params
+              Nothing -> general params {getCustomerQueues,setCustomerQueues}
               Just x -> case x of
-                UserDetailsGeneralLink -> general params
+                UserDetailsGeneralLink -> general params {getCustomerQueues,setCustomerQueues}
                 UserDetailsOrdersLink -> orders
                 UserDetailsDietLink -> diet
                 UserDetailsAllergiesLink -> allergies
@@ -78,11 +82,14 @@ spec params = T.simpleSpec performAction render
 
 userDetails :: forall eff
              . LocalCookingParams SiteLinks UserDetails (Effects eff)
+            -> { getCustomerQueues :: GetCustomerSparrowClientQueues (Effects eff)
+               , setCustomerQueues :: SetCustomerSparrowClientQueues (Effects eff)
+               }
             -> R.ReactElement
-userDetails params =
+userDetails params deps =
   let {spec: reactSpec, dispatcher} =
         T.createReactSpec
-          ( spec params
+          ( spec params deps
           ) (initialState (unsafePerformEff (initLocalCookingState params)))
       reactSpec' =
           whileMountedLocalCooking

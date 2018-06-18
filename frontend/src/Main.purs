@@ -154,8 +154,8 @@ main = do
           }
         ]
       }
-    , content: \{toURI,siteLinks,windowSizeSignal,currentPageSignal} ->
-      [ content {toURI,siteLinks,windowSizeSignal,currentPageSignal}
+    , content: \params ->
+      [ content params
       ]
     , userDetails:
       { buttons: \{siteLinks} ->
@@ -189,6 +189,9 @@ main = do
         ]
       , content: \params ->
         [ userDetails params
+          { getCustomerQueues: mitchQueues.getCustomerQueues
+          , setCustomerQueues: mitchQueues.setCustomerQueues
+          }
         ]
       , obtain: \{user} -> do
         PreUserDetails mUser <- sequential $ PreUserDetails <$> user

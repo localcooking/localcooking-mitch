@@ -8,11 +8,16 @@ import LocalCooking.Spec.Common.Form.Name as Name
 import LocalCooking.Spec.Common.Form.Address as Address
 import LocalCooking.Spec.Common.Form.Submit as Submit
 import LocalCooking.Thermite.Params (LocalCookingState, initLocalCookingState, LocalCookingAction, LocalCookingParams, whileMountedLocalCooking, performActionLocalCooking)
+import LocalCooking.Semantics.Mitch (Customer (..))
+import LocalCooking.Dependencies.Mitch (GetCustomerSparrowClientQueues, SetCustomerSparrowClientQueues)
+import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn (..))
 
 import Prelude
+import Data.Maybe (Maybe (..))
 import Data.Address (USAAddress (..), USAState (CO))
 import Data.Lens (Lens', Prism', lens, prism')
 import Data.UUID (GENUUID)
+import Data.Argonaut.JSONUnit (JSONUnit (..))
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Unsafe (unsafePerformEff, unsafeCoerceEff)
@@ -30,8 +35,10 @@ import MaterialUI.Button as Button
 
 import IxSignal.Internal (IxSignal)
 import IxSignal.Internal as IxSignal
+import IxSignal.Extra (onAvailable)
 import Queue.Types (READ, WRITE, readOnly, writeOnly)
 import Queue.One as One
+import Queue.One.Aff as OneIO
 import IxQueue (IxQueue)
 import IxQueue as IxQueue
 
@@ -147,7 +154,7 @@ spec
         { color: Button.secondary
         , variant: Button.raised
         , size: Button.large
-        , style: createStyles {marginTop: "1em", float: "right"}
+        , style: createStyles {marginTop: "1em"}
         , disabledSignal: submit.disabledSignal
         , triggerQueue: submit.queue
         } [R.text "Submit"]
@@ -159,8 +166,11 @@ spec
 
 general :: forall eff
          . LocalCookingParams SiteLinks UserDetails (Effects eff)
+        -> { getCustomerQueues :: GetCustomerSparrowClientQueues (Effects eff)
+           , setCustomerQueues :: SetCustomerSparrowClientQueues (Effects eff)
+           }
         -> R.ReactElement
-general params =
+general params {getCustomerQueues,setCustomerQueues} =
   let {spec: reactSpec, dispatcher} =
         T.createReactSpec
           ( spec
@@ -202,7 +212,21 @@ general params =
             "Spec.Content.UserDetails.General"
             LocalCookingAction
             (\this -> unsafeCoerceEff <<< dispatcher this)
-            reactSpec
+        $   reactSpec
+              { componentDidMount = \this -> do             
+                  let getCustomerData authToken =
+                        unsafeCoerceEff $ OneIO.callAsyncEff getCustomerQueues
+                          (\mUser -> case mUser of
+                            Nothing -> pure unit
+                            Just (Customer {name,address}) -> do
+                              One.putQueue nameSetQueue (Name.NameGood name)
+                              One.putQueue addressSetQueue address
+                          )
+                          (AccessInitIn {token: authToken, subj: JSONUnit})
+                  unsafeCoerceEff $ onAvailable
+                    getCustomerData
+                    params.authTokenSignal
+              }
   in  R.createElement (R.createClass reactSpec') unit []
   where
     nameSignal = unsafePerformEff $ IxSignal.make $ Name.NamePartial ""
