@@ -196,7 +196,7 @@ general params {getCustomerQueues,setCustomerQueues,siteErrorQueue} =
         x <- case mName of
           Name.NameGood _ -> do
             mAddr <- IxSignal.get addressSignal
-            unsafeCoerceEff $ log $ "uh... address? " <> show mName
+            unsafeCoerceEff $ log $ "uh... address? " <> show mAddr
             case mAddr of
               Nothing -> pure true
               Just _ -> pure false
