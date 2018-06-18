@@ -24,6 +24,7 @@ import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Unsafe (unsafePerformEff, unsafeCoerceEff)
 import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Eff.Console (log)
 
 import Thermite as T
 import React (ReactElement, createClass, createElement) as R
@@ -192,6 +193,7 @@ general params {getCustomerQueues,setCustomerQueues,siteErrorQueue} =
           ) (initialState (unsafePerformEff (initLocalCookingState params)))
       submitValue this = do
         mName <- IxSignal.get nameSignal
+        unsafeCoerceEff $ log $ "uh... name? " <> show mName
         x <- case mName of
           Name.NameGood _ -> do
             mAddr <- IxSignal.get addressSignal
