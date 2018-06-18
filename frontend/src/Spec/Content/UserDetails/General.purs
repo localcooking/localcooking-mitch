@@ -2,6 +2,7 @@ module Spec.Content.UserDetails.General where
 
 import Links (SiteLinks)
 import User (UserDetails)
+import Error (SiteError (SiteErrorCustomer), CustomerError (..))
 import Spec.Icons.NewPerson (newPerson)
 import LocalCooking.Spec.Common.Pending (pending)
 import LocalCooking.Spec.Common.Form.Name as Name
@@ -18,6 +19,7 @@ import Data.Address (USAAddress (..), USAState (CO))
 import Data.Lens (Lens', Prism', lens, prism')
 import Data.UUID (GENUUID)
 import Data.Argonaut.JSONUnit (JSONUnit (..))
+import Control.Monad.Base (liftBase)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Unsafe (unsafePerformEff, unsafeCoerceEff)
@@ -35,7 +37,7 @@ import MaterialUI.Button as Button
 
 import IxSignal.Internal (IxSignal)
 import IxSignal.Internal as IxSignal
-import IxSignal.Extra (onAvailable)
+import IxSignal.Extra (onAvailable, getAvailable, getWhen)
 import Queue.Types (READ, WRITE, readOnly, writeOnly)
 import Queue.One as One
 import Queue.One.Aff as OneIO
@@ -73,13 +75,14 @@ getLCState = lens (_.localCooking) (_ { localCooking = _ })
 
 
 spec :: forall eff
-      . { name ::
+      . LocalCookingParams SiteLinks UserDetails (Effects eff)
+     -> { name ::
           { signal       :: IxSignal (Effects eff) Name.NameState
           , updatedQueue :: IxQueue (read :: READ) (Effects eff) Unit
           , setQueue     :: One.Queue (write :: WRITE) (Effects eff) Name.NameState
           }
         , address ::
-          { signal       :: IxSignal (Effects eff) USAAddress
+          { signal       :: IxSignal (Effects eff) (Maybe USAAddress)
           , updatedQueue :: IxQueue (read :: READ) (Effects eff) Unit
           , setQueue     :: One.Queue (write :: WRITE) (Effects eff) USAAddress
           }
@@ -88,13 +91,18 @@ spec :: forall eff
           , disabledSignal :: IxSignal (Effects eff) Boolean
           }
         , pendingSignal    :: IxSignal (Effects eff) Boolean
+        , setCustomerQueues :: SetCustomerSparrowClientQueues (Effects eff)
+        , siteErrorQueue :: One.Queue (write :: WRITE) (Effects eff) SiteError
         }
      -> T.Spec (Effects eff) State Unit Action
 spec
+  params
   { name
   , address
   , submit
   , pendingSignal
+  , setCustomerQueues
+  , siteErrorQueue
   } = T.simpleSpec performAction render
   where
     performAction action props state = case action of
@@ -102,31 +110,18 @@ spec
       ReRender -> void $ T.cotransform _ {rerender = unit}
       SubmitGeneral -> do
         liftEff $ IxSignal.set true pendingSignal
-        -- authToken <- liftBase $ getAvailable params.authTokenSignal
-        -- let whenEmailGood mX = case mX of
-        --       Email.EmailGood x -> Just x
-        --       _ -> Nothing
-        -- email <- liftBase $ getWhen whenEmailGood email.signal
-        -- mAuthPass <- liftBase $ OneIO.callAsync authenticateDialogQueue unit
-        -- case mAuthPass of
-        --   Nothing -> pure unit
-        --   Just oldPassword -> do
-        --     passwordString <- liftEff (IxSignal.get password.signal)
-        --     newPassword <- liftBase $ hashPassword
-        --       { password: passwordString
-        --       , salt: env.salt
-        --       }
-            -- FIXME assigning new password is a restricted credential set
-            -- case state.user of
-            --   Nothing -> pure unit
-            --   Just (User {id,socialLogin}) ->
-            --     liftEff $ userDeltaIn
-            --             $ UserDeltaInSetUser
-            --             $ SetUser {id,email,socialLogin,oldPassword,newPassword}
+        authToken <- liftBase $ getAvailable params.authTokenSignal
+        let whenNameGood mX = case mX of
+              Name.NameGood x -> Just x
+              _ -> Nothing
+        name <- liftBase $ getWhen whenNameGood name.signal
+        address <- liftBase $ getAvailable address.signal
+        mErr <- liftBase $ OneIO.callAsync setCustomerQueues $
+          AccessInitIn {token: authToken, subj: Customer {name,address}}
         liftEff $ do
-          -- One.putQueue globalErrorQueue $ case mErr of
-          --   Nothing -> GlobalErrorSecurity SecuritySaveFailed
-          --   Just JSONUnit -> GlobalErrorSecurity SecuritySaveSuccess
+          One.putQueue siteErrorQueue $ case mErr of
+            Nothing -> SiteErrorCustomer CustomerSaveFailed
+            Just JSONUnit -> SiteErrorCustomer CustomerSaveSuccess
           -- FIXME threaded...?
           IxSignal.set false pendingSignal
 
@@ -168,12 +163,14 @@ general :: forall eff
          . LocalCookingParams SiteLinks UserDetails (Effects eff)
         -> { getCustomerQueues :: GetCustomerSparrowClientQueues (Effects eff)
            , setCustomerQueues :: SetCustomerSparrowClientQueues (Effects eff)
+           , siteErrorQueue :: One.Queue (write :: WRITE) (Effects eff) SiteError
            }
         -> R.ReactElement
-general params {getCustomerQueues,setCustomerQueues} =
+general params {getCustomerQueues,setCustomerQueues,siteErrorQueue} =
   let {spec: reactSpec, dispatcher} =
         T.createReactSpec
           ( spec
+            params
             { name:
               { signal: nameSignal
               , updatedQueue: nameUpdatedQueue
@@ -189,12 +186,18 @@ general params {getCustomerQueues,setCustomerQueues} =
               , disabledSignal: submitDisabledSignal
               }
             , pendingSignal
+            , setCustomerQueues
+            , siteErrorQueue
             }
           ) (initialState (unsafePerformEff (initLocalCookingState params)))
       submitValue this = do
         mName <- IxSignal.get nameSignal
         x <- case mName of
-          Name.NameGood _ -> pure false
+          Name.NameGood _ -> do
+            mAddr <- IxSignal.get addressSignal
+            case mAddr of
+              Nothing -> pure true
+              Just _ -> pure false
           _ -> pure true
         IxSignal.set x submitDisabledSignal
         unsafeCoerceEff $ dispatcher this ReRender
@@ -232,7 +235,7 @@ general params {getCustomerQueues,setCustomerQueues} =
     nameSignal = unsafePerformEff $ IxSignal.make $ Name.NamePartial ""
     nameUpdatedQueue = unsafePerformEff $ readOnly <$> IxQueue.newIxQueue
     nameSetQueue = unsafePerformEff $ writeOnly <$> One.newQueue
-    addressSignal = unsafePerformEff $ IxSignal.make $ USAAddress {street: "", city: "", state: CO, zip: 80401}
+    addressSignal = unsafePerformEff $ IxSignal.make Nothing
     addressUpdatedQueue = unsafePerformEff $ readOnly <$> IxQueue.newIxQueue
     addressSetQueue = unsafePerformEff $ writeOnly <$> One.newQueue
     pendingSignal = unsafePerformEff (IxSignal.make false)

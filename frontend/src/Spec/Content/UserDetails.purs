@@ -2,6 +2,7 @@ module Spec.Content.UserDetails where
 
 import Links (SiteLinks (UserDetailsLink), UserDetailsLinks (..))
 import User (UserDetails)
+import Error (SiteError)
 import Spec.Content.UserDetails.General (general)
 import Spec.Content.UserDetails.Orders (orders)
 import Spec.Content.UserDetails.Diet (diet)
@@ -26,6 +27,8 @@ import Control.Monad.Eff.Exception (EXCEPTION)
 
 import IxSignal.Internal (IxSignal)
 import IxSignal.Internal as IxSignal
+import Queue.Types (WRITE, READ)
+import Queue.One as One
 import Partial.Unsafe (unsafePartial)
 
 
@@ -56,9 +59,14 @@ spec :: forall eff
       . LocalCookingParams SiteLinks UserDetails (Effects eff)
      -> { getCustomerQueues :: GetCustomerSparrowClientQueues (Effects eff)
         , setCustomerQueues :: SetCustomerSparrowClientQueues (Effects eff)
+        , siteErrorQueue :: One.Queue (write :: WRITE) (Effects eff) SiteError
         }
      -> T.Spec (Effects eff) State Unit Action
-spec params {getCustomerQueues,setCustomerQueues} = T.simpleSpec performAction render
+spec params
+  { getCustomerQueues
+  , setCustomerQueues
+  , siteErrorQueue
+  } = T.simpleSpec performAction render
   where
     performAction action props state = case action of
       LocalCookingAction a -> performActionLocalCooking getLCState a props state
@@ -69,9 +77,17 @@ spec params {getCustomerQueues,setCustomerQueues} = T.simpleSpec performAction r
             -- TODO pack currentPageSignal listener to this level, so
             -- side buttons aren't redrawn
             UserDetailsLink mUserDetails -> case mUserDetails of
-              Nothing -> general params {getCustomerQueues,setCustomerQueues}
+              Nothing -> general params
+                { getCustomerQueues
+                , setCustomerQueues
+                , siteErrorQueue
+                }
               Just x -> case x of
-                UserDetailsGeneralLink -> general params {getCustomerQueues,setCustomerQueues}
+                UserDetailsGeneralLink -> general params
+                  { getCustomerQueues
+                  , setCustomerQueues
+                  , siteErrorQueue
+                  }
                 UserDetailsOrdersLink -> orders
                 UserDetailsDietLink -> diet
                 UserDetailsAllergiesLink -> allergies
@@ -84,12 +100,13 @@ userDetails :: forall eff
              . LocalCookingParams SiteLinks UserDetails (Effects eff)
             -> { getCustomerQueues :: GetCustomerSparrowClientQueues (Effects eff)
                , setCustomerQueues :: SetCustomerSparrowClientQueues (Effects eff)
+               , siteErrorQueue :: One.Queue (write :: WRITE) (Effects eff) SiteError
                }
             -> R.ReactElement
-userDetails params deps =
+userDetails params args =
   let {spec: reactSpec, dispatcher} =
         T.createReactSpec
-          ( spec params deps
+          ( spec params args
           ) (initialState (unsafePerformEff (initLocalCookingState params)))
       reactSpec' =
           whileMountedLocalCooking

@@ -4,6 +4,7 @@ import Links (SiteLinks (..), UserDetailsLinks (..), ImageLinks (Logo40Png), ini
 import Colors (palette)
 import User (UserDetails (..), PreUserDetails (..))
 import Spec.Topbar.Buttons (topbarButtons)
+import Spec.Snackbar (messages)
 import Spec.Content (content)
 import Spec.Content.UserDetails (userDetails)
 import LocalCooking.Types.ServerToClient (env)
@@ -47,7 +48,7 @@ import WebSocket (WEBSOCKET)
 import Network.HTTP.Affjax (AJAX)
 import Browser.WebStorage (WEB_STORAGE)
 import Crypto.Scrypt (SCRYPT)
-import Queue.Types (writeOnly)
+import Queue.Types (readOnly, writeOnly)
 import Queue.One as One
 import Sparrow.Client.Queue (mountSparrowClientQueuesSingleton)
 
@@ -80,6 +81,7 @@ main = do
   initSiteLink <- initSiteLinks
 
   mitchQueues <- newMitchQueues
+  siteErrorQueue <- One.newQueue
 
   searchMealTagsDeltaInQueue <- writeOnly <$> One.newQueue
   searchMealTagsInitInQueue <- writeOnly <$> One.newQueue
@@ -191,6 +193,7 @@ main = do
         [ userDetails params
           { getCustomerQueues: mitchQueues.getCustomerQueues
           , setCustomerQueues: mitchQueues.setCustomerQueues
+          , siteErrorQueue: writeOnly siteErrorQueue
           }
         ]
       , obtain: \{user} -> do
@@ -198,6 +201,11 @@ main = do
         case mUser of
           Just user -> pure $ Just $ UserDetails {user}
           _ -> pure Nothing
+      }
+    , error:
+      { content:
+        [ messages {siteErrorQueue: readOnly siteErrorQueue}
+        ]
       }
     , extendedNetwork:
       [ Button.withStyles
