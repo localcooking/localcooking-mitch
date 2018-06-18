@@ -196,7 +196,6 @@ general params {getCustomerQueues,setCustomerQueues,siteErrorQueue} =
         x <- case mName of
           Name.NameGood _ -> do
             mAddr <- IxSignal.get addressSignal
-            unsafeCoerceEff $ log $ "uh... address? " <> show mAddr
             case mAddr of
               Nothing -> pure true
               Just _ -> pure false
@@ -211,6 +210,10 @@ general params {getCustomerQueues,setCustomerQueues,siteErrorQueue} =
         $ Queue.whileMountedIx
             nameUpdatedQueue
             "nameUpdated"
+            (\this _ -> submitValue this)
+        $ Queue.whileMountedIx
+            addressUpdatedQueue
+            "addressUpdated"
             (\this _ -> submitValue this)
         $ whileMountedLocalCooking
             params
