@@ -193,10 +193,10 @@ general params {getCustomerQueues,setCustomerQueues,siteErrorQueue} =
           ) (initialState (unsafePerformEff (initLocalCookingState params)))
       submitValue this = do
         mName <- IxSignal.get nameSignal
-        unsafeCoerceEff $ log $ "uh... name? " <> show mName
         x <- case mName of
           Name.NameGood _ -> do
             mAddr <- IxSignal.get addressSignal
+            unsafeCoerceEff $ log $ "uh... address? " <> show mName
             case mAddr of
               Nothing -> pure true
               Just _ -> pure false
