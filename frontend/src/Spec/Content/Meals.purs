@@ -1,6 +1,6 @@
 module Spec.Content.Meals where
 
-import LocalCooking.Spec.Tag (tag, TagVariant (..))
+import LocalCooking.Spec.Tag (tag, AnyTag (..))
 import Spec.Dialogs.Datepicker (datepicker, initDatepicked)
 
 import Prelude
@@ -11,6 +11,7 @@ import Data.Time.Duration (Days (..), Milliseconds (..))
 import Data.DateTime.Locale (LocalValue (..))
 import Data.Int as Int
 import Data.Generic (class Generic, gEq)
+import Data.String.Yarn (fromString)
 import Control.Monad.Base (liftBase)
 import Control.Monad.Aff (delay)
 import Control.Monad.Eff.Ref (REF)
@@ -135,56 +136,47 @@ spec {pickDate} = T.simpleSpec performAction render
               [ tag
                 { onClick: Just (pure unit)
                 , onDelete: Nothing
-                , variant: TagDiet
-                , label: "Paleo"
+                , tag: TagDiet $ fromString "Paleo"
                 }
               , tag
                 { onClick: Just (pure unit)
                 , onDelete: Nothing
-                , variant: TagDiet
-                , label: "Vegan"
+                , tag: TagDiet $ fromString "Vegan"
                 }
               , tag
                 { onClick: Just (pure unit)
                 , onDelete: Nothing
-                , variant: TagDiet
-                , label: "Gluten Free"
+                , tag: TagDiet $ fromString "Gluten Free"
                 }
               , tag
                 { onClick: Just (pure unit)
                 , onDelete: Nothing
-                , variant: TagIngredient
-                , label: "Ginger"
+                , tag: TagIngredient $ fromString "Ginger"
                 }
               , tag
                 { onClick: Just (pure unit)
                 , onDelete: Nothing
-                , variant: TagMeal
-                , label: "Curry"
+                , tag: TagMeal $ fromString "Curry"
                 }
               , tag
                 { onClick: Just (pure unit)
                 , onDelete: Nothing
-                , variant: TagIngredient
-                , label: "Seafood"
+                , tag: TagIngredient $ fromString "Seafood"
                 }
               , tag
                 { onClick: Just (pure unit)
                 , onDelete: Nothing
-                , variant: TagDiet
-                , label: "Raw"
+                , tag: TagDiet $ fromString "Raw"
                 }
               , tag
                 { onClick: Just (pure unit)
                 , onDelete: Nothing
-                , variant: TagCulture
-                , label: "German"
+                , tag: TagCulture $ fromString "German"
                 }
               , tag
                 { onClick: Just (pure unit)
                 , onDelete: Nothing
-                , variant: TagCulture
-                , label: "Nepalese"
+                , tag: TagCulture $ fromString "Nepalese"
                 }
               ]
             , divider {}
@@ -234,26 +226,22 @@ spec {pickDate} = T.simpleSpec performAction render
             [ tag
               { onDelete: Just (pure unit)
               , onClick: Nothing
-              , variant: TagDiet
-              , label: "Vegitarian"
+              , tag: TagDiet $ fromString "Vegitarian"
               }
             , tag
               { onDelete: Just (pure unit)
               , onClick: Nothing
-              , variant: TagIngredient
-              , label: "Parmesan"
+              , tag: TagIngredient $ fromString "Parmesan"
               }
             , tag
               { onDelete: Just (pure unit)
               , onClick: Nothing
-              , variant: TagCulture
-              , label: "Hebrew"
+              , tag: TagCulture $ fromString "Hebrew"
               }
             , tag
               { onDelete: Just (pure unit)
               , onClick: Nothing
-              , variant: TagMeal
-              , label: "Pasta"
+              , tag: TagMeal $ fromString "Pasta"
               }
             ]
           , typography
@@ -263,10 +251,10 @@ spec {pickDate} = T.simpleSpec performAction render
             -- [ grid {item: true, xs: 4}
             --   [ paper {style: createStyles {width: "100%", padding: "0.5em"}}
             --     [ typography
-            --       { variant: Typography.headline
+            --       { tag: Typography.headline
             --       } [R.text "Wienerschnitzel"]
             --     , typography
-            --       { variant: Typography.body1
+            --       { tag: Typography.body1
             --       } [R.text "Foo"]
             --     ]
             --   ]

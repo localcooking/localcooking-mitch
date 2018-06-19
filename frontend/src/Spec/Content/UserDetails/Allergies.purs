@@ -1,7 +1,7 @@
 module Spec.Content.UserDetails.Allergies where
 
 import LocalCooking.Common.Ingredient (IngredientName (..))
-import LocalCooking.Spec.Tag (tag, TagVariant (TagIngredient))
+import LocalCooking.Spec.Tag (tag, AnyTag (TagIngredient))
 import LocalCooking.Spec.Common.Form.Search as Search
 import LocalCooking.Spec.Common.Form.SearchResults as SearchResults
 import LocalCooking.Spec.Common.Form.Decisions as Decisions
@@ -109,24 +109,22 @@ spec {search,submit,results,decisions} = T.simpleSpec performAction render
         , addQueue: results.addQueue
         , delQueue: results.delQueue
         , resultsSignal: results.signal
-        , renderA: \(IngredientName d) ->
+        , renderA: \i ->
             tag
             { onClick: Just (pure unit)
             , onDelete: Nothing
-            , variant: TagIngredient
-            , label: d
+            , tag: TagIngredient i
             }
         }
       , Decisions.decisions
         { addQueue: decisions.addQueue
         , delQueue: decisions.delQueue
         , decisionsSignal: decisions.signal
-        , renderA: \(IngredientName d) ->
+        , renderA: \i ->
             tag
             { onClick: Nothing
             , onDelete: Just (pure unit)
-            , variant: TagIngredient
-            , label: d
+            , tag: TagIngredient i
             }
         }
       ]

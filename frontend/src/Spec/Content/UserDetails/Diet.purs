@@ -1,7 +1,7 @@
 module Spec.Content.UserDetails.Diet where
 
 import LocalCooking.Common.Diet (Diet (..))
-import LocalCooking.Spec.Tag (tag, TagVariant (TagDiet))
+import LocalCooking.Spec.Tag (tag, AnyTag (TagDiet))
 import LocalCooking.Spec.Common.Form.Search as Search
 import LocalCooking.Spec.Common.Form.SearchResults as SearchResults
 import LocalCooking.Spec.Common.Form.Decisions as Decisions
@@ -111,24 +111,22 @@ spec {search,submit,results,decisions} = T.simpleSpec performAction render
         , addQueue: results.addQueue
         , delQueue: results.delQueue
         , resultsSignal: results.signal
-        , renderA: \(Diet d) ->
+        , renderA: \d ->
             tag
             { onClick: Just (pure unit)
             , onDelete: Nothing
-            , variant: TagDiet
-            , label: d
+            , tag: TagDiet d
             }
         }
       , Decisions.decisions
         { addQueue: decisions.addQueue
         , delQueue: decisions.delQueue
         , decisionsSignal: decisions.signal
-        , renderA: \(Diet d) ->
+        , renderA: \d ->
             tag
             { onClick: Nothing
             , onDelete: Just (pure unit)
-            , variant: TagDiet
-            , label: d
+            , tag: TagDiet d
             }
         }
       ]
