@@ -1,6 +1,7 @@
 module Spec.Content.Meals where
 
 import LocalCooking.Spec.Tag (tag, AnyTag (..))
+import Spec.Snackbar (messages)
 import Spec.Dialogs.Datepicker (datepicker, initDatepicked)
 
 import Prelude

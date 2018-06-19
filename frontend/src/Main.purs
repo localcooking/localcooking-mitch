@@ -1,6 +1,6 @@
 module Main where
 
-import Links (SiteLinks (..), UserDetailsLinks (..), ImageLinks (Logo40Png), initSiteLinks)
+import Links (SiteLinks (..), UserDetailsLinks (..))
 import Colors (palette)
 import User (UserDetails (..), PreUserDetails (..))
 import Spec.Topbar.Buttons (topbarButtons)
@@ -12,6 +12,8 @@ import LocalCooking.Spec.Misc.Branding (mainBrand)
 import LocalCooking.Spec.Misc.Icons.ChefHat (chefHatViewBox, chefHat)
 import LocalCooking.Main (defaultMain)
 import LocalCooking.Dependencies.Mitch (mitchDependencies, newMitchQueues)
+import LocalCooking.Global.Links.Class (initSiteLinks)
+import LocalCooking.Global.Links.Internal (ImageLinks (Logo40Png))
 
 
 import Prelude
