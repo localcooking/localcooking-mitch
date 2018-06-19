@@ -5,7 +5,7 @@ import User (UserDetails)
 import Error (SiteError)
 import Spec.Content.UserDetails.General (general)
 import Spec.Content.UserDetails.Orders (orders)
-import Spec.Content.UserDetails.Diet (diet)
+import Spec.Content.UserDetails.Diet (diets)
 import Spec.Content.UserDetails.Allergies (allergies)
 import LocalCooking.Thermite.Params (LocalCookingParams, LocalCookingState, initLocalCookingState, performActionLocalCooking, LocalCookingAction, whileMountedLocalCooking)
 import LocalCooking.Dependencies.Mitch (GetCustomerSparrowClientQueues, SetCustomerSparrowClientQueues)
@@ -89,7 +89,7 @@ spec params
                   , siteErrorQueue
                   }
                 UserDetailsOrdersLink -> orders
-                UserDetailsDietLink -> diet
+                UserDetailsDietLink -> diets
                 UserDetailsAllergiesLink -> allergies
                 _ -> R.text ""
             _ -> R.text ""

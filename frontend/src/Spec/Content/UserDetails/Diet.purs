@@ -81,7 +81,7 @@ spec {search,submit,results,decisions} = T.simpleSpec performAction render
     render dispatch props state children =
       [ typography
         { variant: Typography.headline
-        } [R.text "Diet"]
+        } [R.text "Diets"]
       , divider {}
       , grid {spacing: Grid.spacing8, container: true}
         [ grid {xs: 10, item: true}
@@ -133,8 +133,8 @@ spec {search,submit,results,decisions} = T.simpleSpec performAction render
       ]
 
 
-diet :: R.ReactElement
-diet =
+diets :: R.ReactElement
+diets =
   let {spec: reactSpec, dispatcher} =
         T.createReactSpec
           ( spec
