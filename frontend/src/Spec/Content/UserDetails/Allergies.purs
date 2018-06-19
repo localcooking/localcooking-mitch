@@ -48,21 +48,6 @@ type Effects eff =
   | eff)
 
 
--- spec :: forall eff. T.Spec eff State Unit Action
--- spec = T.simpleSpec performAction render
---   where
---     performAction action props state = pure unit
-
---     render :: T.Render State Unit Action
---     render dispatch props state children =
---       [ R.text "Allergies" ]
-
-
--- allergies :: R.ReactElement
--- allergies =
---   let {spec: reactSpec, dispatcher} = T.createReactSpec spec initialState
---   in  R.createElement (R.createClass reactSpec) unit []
-
 spec :: forall eff
       . { search ::
           { updatedQueue :: IxQueue (read :: READ) (Effects eff) Unit
@@ -112,9 +97,10 @@ spec {search,submit,results,decisions} = T.simpleSpec performAction render
             { color: Button.primary
             , variant: Button.raised
             , size: Button.medium
-            , style: createStyles {}
+            , style: createStyles {width: "100%"}
             , triggerQueue: submit.triggerQueue
             , disabledSignal: submit.disabled
+            , fullWidth: true
             } [R.text "Add"]
           ]
         ]

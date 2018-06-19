@@ -102,6 +102,7 @@ spec {search,submit,results,decisions} = T.simpleSpec performAction render
             , style: createStyles {}
             , triggerQueue: submit.triggerQueue
             , disabledSignal: submit.disabled
+            , fullWidth: true
             } [R.text "Add"]
           ]
         ]
