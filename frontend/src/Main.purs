@@ -12,7 +12,6 @@ import LocalCooking.Spec.Misc.Branding (mainBrand)
 import LocalCooking.Spec.Misc.Icons.ChefHat (chefHatViewBox, chefHat)
 import LocalCooking.Main (defaultMain)
 import LocalCooking.Dependencies.Mitch (mitchDependencies, newMitchQueues)
-import LocalCooking.Global.Links.Class (initSiteLinks)
 import LocalCooking.Global.Links.Internal (ImageLinks (Logo40Png))
 
 

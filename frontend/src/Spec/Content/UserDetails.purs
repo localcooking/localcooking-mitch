@@ -29,7 +29,6 @@ import IxSignal.Internal (IxSignal)
 import IxSignal.Internal as IxSignal
 import Queue.Types (WRITE, READ)
 import Queue.One as One
-import Partial.Unsafe (unsafePartial)
 
 
 type State =
