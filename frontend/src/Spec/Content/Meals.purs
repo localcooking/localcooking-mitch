@@ -1,7 +1,6 @@
 module Spec.Content.Meals where
 
 import LocalCooking.Spec.Tag (tag, AnyTag (..))
-import Spec.Snackbar (messages)
 import Spec.Dialogs.Datepicker (datepicker, initDatepicked)
 
 import Prelude
@@ -35,8 +34,6 @@ import MaterialUI.Drawer (drawer)
 import MaterialUI.Drawer as Drawer
 import MaterialUI.Button (button)
 import MaterialUI.Button as Button
-import MaterialUI.Grid (grid)
-import MaterialUI.Grid as Grid
 import MaterialUI.Input (inputAdornment)
 import MaterialUI.Input as Input
 import MaterialUI.Paper (paper)

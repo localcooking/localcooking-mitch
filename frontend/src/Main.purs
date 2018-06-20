@@ -1,15 +1,15 @@
 module Main where
 
-import Links (SiteLinks (..), UserDetailsLinks (..))
 import Colors (palette)
 import User (UserDetails (..), PreUserDetails (..))
 import Spec.Topbar.Buttons (topbarButtons)
+import Spec.Drawers.Buttons (drawersButtons)
 import Spec.Snackbar (messages)
 import Spec.Content (content)
 import Spec.Content.UserDetails (userDetails)
+import Spec.Content.UserDetails.Buttons (userDetailsButtons)
 import LocalCooking.Types.ServerToClient (env)
 import LocalCooking.Spec.Misc.Branding (mainBrand)
-import LocalCooking.Spec.Misc.Icons.ChefHat (chefHatViewBox, chefHat)
 import LocalCooking.Main (defaultMain)
 import LocalCooking.Dependencies.Mitch (mitchDependencies, newMitchQueues)
 import LocalCooking.Global.Links.Internal (ImageLinks (Logo40Png))
@@ -27,22 +27,15 @@ import Control.Monad.Eff.Timer (TIMER)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Console (CONSOLE, log)
-import Control.Monad.Eff.Uncurried (mkEffFn1)
-import Control.Monad.Eff.Unsafe (unsafeCoerceEff)
 import Control.Execution.Immediate (SET_IMMEDIATE_SHIM)
 
 import React.DOM (text) as R
 import MaterialUI.InjectTapEvent (INJECT_TAP_EVENT)
-import MaterialUI.Divider (divider)
 import MaterialUI.Types (createStyles)
 import MaterialUI.SvgIcon (svgIcon)
 import MaterialUI.SvgIcon as SvgIcon
 import MaterialUI.Button (button)
 import MaterialUI.Button as Button
-import MaterialUI.ListItem (listItem)
-import MaterialUI.ListItemIcon (listItemIcon)
-import MaterialUI.ListItemText (listItemText)
-import MaterialUI.Icons.RestaurantMenu (restaurantMenuIcon)
 import DOM (DOM)
 import DOM.HTML.Types (HISTORY)
 import WebSocket (WEBSOCKET)
@@ -120,80 +113,21 @@ main = do
     , deps: mitchDependencies
     , extraRedirect: \_ _ -> Nothing
     , leftDrawer:
-      { buttons: \{toURI,siteLinks,currentPageSignal,windowSizeSignal,authTokenSignal} ->
-        [ divider {}
-        , listItem
-          { button: true
-          , onClick: mkEffFn1 \_ -> unsafeCoerceEff $ siteLinks MealsLink
-          }
-          [ listItemIcon {} restaurantMenuIcon
-          , listItemText
-            { primary: "Meals"
-            }
-          ]
-        , divider {}
-        , listItem
-          { button: true
-          , onClick: mkEffFn1 \_ -> unsafeCoerceEff $ siteLinks ChefsLink
-          }
-          [ listItemIcon {} $ svgIcon {viewBox: chefHatViewBox, color: SvgIcon.action}
-              [chefHat]
-          , listItemText
-            { primary: "Chefs"
-            }
-          ]
-        ]
+      { buttons: drawersButtons
       }
     , topbar:
       { imageSrc: toLocation Logo40Png
-      , buttons: \{toURI,siteLinks,currentPageSignal,windowSizeSignal,authTokenSignal} ->
-        [ topbarButtons
-          { currentPageSignal
-          , siteLinks
-          , toURI
-          }
-        ]
+      , buttons: topbarButtons
       }
-    , content: \params ->
-      [ content params
-      ]
+    , content: content
     , userDetails:
-      { buttons: \{siteLinks} ->
-        [ listItem
-            { button: true
-            , onClick: mkEffFn1 \_ -> unsafeCoerceEff $ siteLinks $ UserDetailsLink $ Just UserDetailsOrdersLink
-            }
-            [ listItemText
-              { primary: "Orders"
-              }
-            ]
-        , divider {}
-        , listItem
-            { button: true
-            , onClick: mkEffFn1 \_ -> unsafeCoerceEff $ siteLinks $ UserDetailsLink $ Just UserDetailsDietLink
-            }
-            [ listItemText
-              { primary: "Diet"
-              }
-            ]
-        , divider {}
-        , listItem
-            { button: true
-            , onClick: mkEffFn1 \_ -> unsafeCoerceEff $ siteLinks $ UserDetailsLink $ Just UserDetailsAllergiesLink
-            }
-            [ listItemText
-              { primary: "Allergies"
-              }
-            ]
-        , divider {}
-        ]
+      { buttons: userDetailsButtons
       , content: \params ->
-        [ userDetails params
+        userDetails params
           { getCustomerQueues: mitchQueues.getCustomerQueues
           , setCustomerQueues: mitchQueues.setCustomerQueues
           , siteErrorQueue: writeOnly siteErrorQueue
           }
-        ]
       , obtain: \{user} -> do
         PreUserDetails mUser <- sequential $ PreUserDetails <$> user
         case mUser of
@@ -201,9 +135,7 @@ main = do
           _ -> pure Nothing
       }
     , error:
-      { content:
-        [ messages {siteErrorQueue: readOnly siteErrorQueue}
-        ]
+      { content: messages {siteErrorQueue: readOnly siteErrorQueue}
       }
     , extendedNetwork:
       [ Button.withStyles

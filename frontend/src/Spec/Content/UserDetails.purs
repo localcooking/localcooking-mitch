@@ -11,23 +11,19 @@ import LocalCooking.Thermite.Params (LocalCookingParams, LocalCookingState, init
 import LocalCooking.Dependencies.Mitch (GetCustomerSparrowClientQueues, SetCustomerSparrowClientQueues)
 
 import Prelude
-import Data.Lens (Lens', Prism', lens, prism')
+import Data.Lens (Lens', lens)
 
 import Thermite as T
 import React (ReactElement, createClass, createElement) as R
 import React.DOM (text) as R
-import React.Signal.WhileMounted as Signal
 
 import Data.Maybe (Maybe (..))
 import Data.UUID (GENUUID)
-import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Unsafe (unsafeCoerceEff, unsafePerformEff)
 import Control.Monad.Eff.Exception (EXCEPTION)
 
-import IxSignal.Internal (IxSignal)
-import IxSignal.Internal as IxSignal
-import Queue.Types (WRITE, READ)
+import Queue.Types (WRITE)
 import Queue.One as One
 
 

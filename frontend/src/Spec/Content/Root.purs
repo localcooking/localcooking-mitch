@@ -1,12 +1,15 @@
 module Spec.Content.Root where
 
 import Links (SiteLinks (RegisterLink, MealsLink, ChefsLink), AboutPageLinks (..))
+import User (UserDetails)
+import LocalCooking.Thermite.Params (LocalCookingParams, LocalCookingState, LocalCookingAction, whileMountedLocalCooking, performActionLocalCooking, initLocalCookingState)
 
 import Prelude
 import Data.UUID (GENUUID)
 import Data.URI (URI)
 import Data.URI.URI as URI
 import Data.URI.Location (Location, toLocation)
+import Data.Lens (Lens', lens)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Ref (REF)
@@ -18,7 +21,6 @@ import DOM.HTML.Window.Extra (WindowSize (Laptop))
 import React (ReactElement, createClass, createElement) as R
 import React.DOM (div, em, img, strong, text) as R
 import React.DOM.Props as RP
-import React.Signal.WhileMounted as Signal
 import React.DOM.Props.PreventDefault (preventDefault)
 
 import MaterialUI.Types (createStyles)
@@ -40,22 +42,20 @@ import MaterialUI.Icons.Timelapse (timelapseIcon)
 import MaterialUI.Icons.LocalShipping (localShippingIcon)
 import MaterialUI.Icons.RestaurantMenu (restaurantMenuIcon)
 
-import IxSignal.Internal (IxSignal)
-import IxSignal.Internal as IxSignal
 
 
 
 type State =
-  { windowSize :: WindowSize
+  { localCooking :: LocalCookingState SiteLinks UserDetails
   }
 
-initialState :: {initWindowSize :: WindowSize} -> State
-initialState {initWindowSize} =
-  { windowSize: initWindowSize
+initialState :: LocalCookingState SiteLinks UserDetails -> State
+initialState localCooking =
+  { localCooking
   }
 
 data Action
-  = ChangedWindowSize WindowSize
+  = LocalCookingAction (LocalCookingAction SiteLinks UserDetails)
 
 type Effects eff =
   ( ref       :: REF
@@ -64,25 +64,29 @@ type Effects eff =
   | eff)
 
 
+getLCState :: Lens' State (LocalCookingState SiteLinks UserDetails)
+getLCState = lens (_.localCooking) (_ { localCooking = _ })
+
+
 spec :: forall eff
-      . { toURI :: Location -> URI
-        , siteLinks :: SiteLinks -> Eff (Effects eff) Unit
-        }
+      . LocalCookingParams SiteLinks UserDetails (Effects eff)
      -> T.Spec (Effects eff) State Unit Action
-spec {toURI,siteLinks} = T.simpleSpec performAction render
+spec params@{toURI,siteLinks} = T.simpleSpec performAction render
   where
     performAction action props state = case action of
-      ChangedWindowSize w -> void $ T.cotransform _ { windowSize = w }
+      LocalCookingAction a -> performActionLocalCooking getLCState a props state
 
     render :: T.Render State Unit Action
     render dispatch props state children =
       [ typography
-        { variant: if state.windowSize < Laptop then Typography.headline else Typography.display1
+        { variant: if state.localCooking.windowSize < Laptop
+                      then Typography.headline
+                      else Typography.display1
         , align: Typography.right
         , color: Typography.primary
         , style: createStyles {marginBottom: "1em"}
         } [R.text "Locally Sourced Cuisine for Working Families"]
-      ] <> ( if state.windowSize < Laptop
+      ] <> ( if state.localCooking.windowSize < Laptop
                 then paragraph1 {toURI,siteLinks}
                 else
                   [ grid
@@ -105,12 +109,14 @@ spec {toURI,siteLinks} = T.simpleSpec performAction render
            ) <>
       [ divider {}
       , typography
-        { variant: if state.windowSize < Laptop then Typography.headline else Typography.display1
+        { variant: if state.localCooking.windowSize < Laptop
+                      then Typography.headline
+                      else Typography.display1
         , align: Typography.left
         , color: Typography.primary
         , style: createStyles {marginBottom: "1em", marginTop: "1em"}
         } [R.text "Simple Personalized Ordering"]
-      ] <> ( if state.windowSize < Laptop
+      ] <> ( if state.localCooking.windowSize < Laptop
                 then paragraph2
                 else
                   [ grid
@@ -133,12 +139,14 @@ spec {toURI,siteLinks} = T.simpleSpec performAction render
            ) <>
       [ divider {}
       , typography
-        { variant: if state.windowSize < Laptop then Typography.headline else Typography.display1
+        { variant: if state.localCooking.windowSize < Laptop
+                      then Typography.headline
+                      else Typography.display1
         , align: Typography.right
         , color: Typography.primary
         , style: createStyles {marginBottom: "1em", marginTop: "1em"}
         } [R.text "How Long Does it Take, and Why?"]
-      ] <> ( if state.windowSize < Laptop
+      ] <> ( if state.localCooking.windowSize < Laptop
                 then paragraph3
                 else
                   [ grid
@@ -165,20 +173,19 @@ spec {toURI,siteLinks} = T.simpleSpec performAction render
 
 
 root :: forall eff
-      . { windowSizeSignal :: IxSignal (Effects eff) WindowSize
-        , toURI :: Location -> URI
-        , siteLinks :: SiteLinks -> Eff (Effects eff) Unit
-        }
+      . LocalCookingParams SiteLinks UserDetails (Effects eff)
      -> R.ReactElement
-root {windowSizeSignal,toURI,siteLinks} =
-  let init =
-        { initWindowSize: unsafePerformEff $ IxSignal.get windowSizeSignal
-        }
-      {spec: reactSpec, dispatcher} = T.createReactSpec (spec {toURI,siteLinks}) (initialState init)
+root params =
+  let {spec: reactSpec, dispatcher} =
+        T.createReactSpec
+          ( spec params
+          ) (initialState (unsafePerformEff (initLocalCookingState params)))
       reactSpec' =
-          Signal.whileMountedIxUUID
-            windowSizeSignal
-            (\this x -> unsafeCoerceEff $ dispatcher this (ChangedWindowSize x))
+        whileMountedLocalCooking
+          params
+          "Spec.Content"
+          LocalCookingAction
+          (\this -> unsafeCoerceEff <<< dispatcher this)
           reactSpec
   in  R.createElement (R.createClass reactSpec') unit []
 

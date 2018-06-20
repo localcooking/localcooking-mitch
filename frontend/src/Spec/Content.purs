@@ -9,25 +9,17 @@ import LocalCooking.Thermite.Params (LocalCookingParams, LocalCookingState, Loca
 
 import Prelude
 import Data.UUID (GENUUID)
-import Data.URI (URI)
-import Data.URI.Location (Location)
-import Data.Lens (Lens', Prism', lens, prism')
-import Control.Monad.Eff (Eff)
+import Data.Lens (Lens', lens)
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Unsafe (unsafeCoerceEff, unsafePerformEff)
 import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Exception (EXCEPTION)
 
 import Thermite as T
-import DOM.HTML.Window.Extra (WindowSize)
 import React (ReactElement, createClass, createElement) as R
 import React.DOM (text) as R
-import React.Signal.WhileMounted as Signal
 
 import Crypto.Scrypt (SCRYPT)
-
-import IxSignal.Internal (IxSignal)
-import IxSignal.Internal as IxSignal
 
 
 
@@ -70,7 +62,7 @@ spec
     render :: T.Render State Unit Action
     render dispatch props state children =
       [ case state.localCooking.currentPage of
-          RootLink -> root {windowSizeSignal: params.windowSizeSignal,toURI: params.toURI,siteLinks: params.siteLinks}
+          RootLink -> root params
           ChefsLink -> chefs
           MealsLink -> meals
           _ -> R.text ""
@@ -86,8 +78,7 @@ content
   let {spec: reactSpec, dispatcher} =
         T.createReactSpec
           ( spec params
-          )
-          (initialState (unsafePerformEff (initLocalCookingState params)))
+          ) (initialState (unsafePerformEff (initLocalCookingState params)))
       reactSpec' =
         whileMountedLocalCooking
           params

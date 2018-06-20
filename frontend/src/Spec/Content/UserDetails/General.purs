@@ -3,7 +3,6 @@ module Spec.Content.UserDetails.General where
 import Links (SiteLinks)
 import User (UserDetails)
 import Error (SiteError (SiteErrorCustomer), CustomerError (..))
-import Spec.Icons.NewPerson (newPerson)
 import LocalCooking.Spec.Common.Pending (pending)
 import LocalCooking.Spec.Common.Form.Name as Name
 import LocalCooking.Spec.Common.Form.Address as Address
@@ -15,8 +14,8 @@ import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn (..))
 
 import Prelude
 import Data.Maybe (Maybe (..))
-import Data.Address (USAAddress (..), USAState (CO))
-import Data.Lens (Lens', Prism', lens, prism')
+import Data.Address (USAAddress)
+import Data.Lens (Lens', lens)
 import Data.UUID (GENUUID)
 import Data.Argonaut.JSONUnit (JSONUnit (..))
 import Control.Monad.Base (liftBase)
@@ -24,7 +23,6 @@ import Control.Monad.Eff.Ref (REF)
 import Control.Monad.Eff.Exception (EXCEPTION)
 import Control.Monad.Eff.Unsafe (unsafePerformEff, unsafeCoerceEff)
 import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Console (log)
 
 import Thermite as T
 import React (ReactElement, createClass, createElement) as R
