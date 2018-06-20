@@ -80,8 +80,6 @@ main :: Eff Effects Unit
 main = do
   log "Starting Local Cooking frontend..."
 
-  initSiteLink <- initSiteLinks
-
   mitchQueues <- newMitchQueues
   siteErrorQueue <- One.newQueue
 
@@ -118,7 +116,6 @@ main = do
 
   defaultMain
     { env
-    , initSiteLinks: initSiteLink
     , palette
     , siteQueues: mitchQueues
     , deps: mitchDependencies
