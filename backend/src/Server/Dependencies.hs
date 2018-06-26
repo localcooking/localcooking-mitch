@@ -5,6 +5,7 @@
 module Server.Dependencies where
 
 import LocalCooking.Dependencies.Mitch (mitchDependencies)
+import LocalCooking.Dependencies.Tag (tagDependencies)
 import LocalCooking.Function.System (SystemM)
 
 
@@ -14,5 +15,6 @@ import Network.Wai.Trans (MiddlewareT)
 
 
 dependencies :: SparrowServerT (MiddlewareT SystemM) [] SystemM ()
-dependencies =
+dependencies = do
   mitchDependencies
+  tagDependencies
