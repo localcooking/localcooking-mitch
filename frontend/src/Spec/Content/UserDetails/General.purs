@@ -8,7 +8,7 @@ import LocalCooking.Spec.Common.Form.Name as Name
 import LocalCooking.Spec.Common.Form.Address as Address
 import LocalCooking.Spec.Common.Form.Submit as Submit
 import LocalCooking.Thermite.Params (LocalCookingState, initLocalCookingState, LocalCookingAction, LocalCookingParams, whileMountedLocalCooking, performActionLocalCooking)
-import LocalCooking.Semantics.Mitch (Customer (..))
+import LocalCooking.Semantics.Mitch (GetSetCustomer (..))
 import LocalCooking.Dependencies.Mitch (GetCustomerSparrowClientQueues, SetCustomerSparrowClientQueues)
 import LocalCooking.Dependencies.AccessToken.Generic (AccessInitIn (..))
 
@@ -116,7 +116,7 @@ spec
         name <- liftBase $ getWhen whenNameGood name.signal
         address <- liftBase $ getAvailable address.signal
         mErr <- liftBase $ OneIO.callAsync setCustomerQueues $
-          AccessInitIn {token: authToken, subj: Customer {name,address}}
+          AccessInitIn {token: authToken, subj: GetSetCustomer {name,address}}
         liftEff $ do
           One.putQueue siteErrorQueue $ case mErr of
             Nothing -> SiteErrorCustomer CustomerSaveFailed
@@ -225,7 +225,7 @@ general params {getCustomerQueues,setCustomerQueues,siteErrorQueue} =
                         unsafeCoerceEff $ OneIO.callAsyncEff getCustomerQueues
                           (\mUser -> case mUser of
                             Nothing -> pure unit
-                            Just (Customer {name,address}) -> do
+                            Just (GetSetCustomer {name,address}) -> do
                               One.putQueue nameSetQueue (Name.NameGood name)
                               One.putQueue addressSetQueue address
                           )

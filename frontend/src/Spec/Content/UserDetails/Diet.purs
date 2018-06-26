@@ -1,6 +1,6 @@
 module Spec.Content.UserDetails.Diet where
 
-import LocalCooking.Common.Diet (Diet (..))
+import LocalCooking.Common.Tag.Diet (DietTag (..))
 import LocalCooking.Spec.Tag (tag, AnyTag (TagDiet))
 import LocalCooking.Spec.Common.Form.Search as Search
 import LocalCooking.Spec.Common.Form.SearchResults as SearchResults
@@ -61,15 +61,15 @@ spec :: forall eff
           , disabled :: IxSignal (Effects eff) Boolean
           }
         , results ::
-          { setQueue :: One.Queue (write :: WRITE) (Effects eff) (Array Diet)
-          , addQueue :: One.Queue (write :: WRITE) (Effects eff) (Array Diet)
-          , delQueue :: One.Queue (write :: WRITE) (Effects eff) Diet
-          , signal :: IxSignal (Effects eff) (Array Diet)
+          { setQueue :: One.Queue (write :: WRITE) (Effects eff) (Array DietTag)
+          , addQueue :: One.Queue (write :: WRITE) (Effects eff) (Array DietTag)
+          , delQueue :: One.Queue (write :: WRITE) (Effects eff) DietTag
+          , signal :: IxSignal (Effects eff) (Array DietTag)
           }
         , decisions ::
-          { addQueue :: One.Queue (write :: WRITE) (Effects eff) Diet
-          , delQueue :: One.Queue (write :: WRITE) (Effects eff) Diet
-          , signal :: IxSignal (Effects eff) (Array Diet)
+          { addQueue :: One.Queue (write :: WRITE) (Effects eff) DietTag
+          , delQueue :: One.Queue (write :: WRITE) (Effects eff) DietTag
+          , signal :: IxSignal (Effects eff) (Array DietTag)
           }
         }
      -> T.Spec eff State Unit Action

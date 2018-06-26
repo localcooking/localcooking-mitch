@@ -12,6 +12,7 @@ import LocalCooking.Types.ServerToClient (env)
 import LocalCooking.Spec.Misc.Branding (mainBrand)
 import LocalCooking.Main (defaultMain)
 import LocalCooking.Dependencies.Mitch (mitchDependencies, newMitchQueues)
+import LocalCooking.Dependencies.Tag (tagDependencies, newTagQueues)
 import LocalCooking.Global.Links.Internal (ImageLinks (Logo40Png))
 
 
@@ -73,6 +74,7 @@ main = do
   log "Starting Local Cooking frontend..."
 
   mitchQueues <- newMitchQueues
+  tagQueues <- newTagQueues
   siteErrorQueue <- One.newQueue
 
   searchMealTagsDeltaInQueue <- writeOnly <$> One.newQueue
@@ -84,13 +86,12 @@ main = do
           -- FIXME subsidiary specific error queue
         Just mealTags -> pure unit
           -- apply result to queue that targets that ui component
-      searchMealTagsOnInitOut mInitOut = do
-          case mInitOut of
-            Nothing -> pure unit
-              -- FIXME apply to mitch error queue
-            Just JSONUnit -> pure unit
+      searchMealTagsOnInitOut mInitOut = case mInitOut of
+        Nothing -> pure unit
+          -- FIXME apply to mitch error queue
+        Just JSONUnit -> pure unit
 
-  _ <- mountSparrowClientQueuesSingleton mitchQueues.searchMealTagsQueues
+  _ <- mountSparrowClientQueuesSingleton tagQueues.searchMealTagsQueues
     searchMealTagsDeltaInQueue searchMealTagsInitInQueue searchMealTagsOnDeltaOut searchMealTagsOnInitOut
   -- One.onQueue searchMealTagKillificator \_ -> killSearchMealTagSub -- hack applied
 
@@ -109,8 +110,10 @@ main = do
   defaultMain
     { env
     , palette
-    , siteQueues: mitchQueues
-    , deps: mitchDependencies
+    , siteQueues: {mitchQueues,tagQueues}
+    , deps: \{mitchQueues,tagQueues} -> do
+        mitchDependencies mitchQueues
+        tagDependencies tagQueues
     , extraRedirect: \_ _ -> Nothing
     , leftDrawer:
       { buttons: drawersButtons

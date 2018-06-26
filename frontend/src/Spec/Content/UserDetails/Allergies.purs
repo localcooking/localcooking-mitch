@@ -1,6 +1,6 @@
 module Spec.Content.UserDetails.Allergies where
 
-import LocalCooking.Common.Ingredient (IngredientName (..))
+import LocalCooking.Common.Tag.Ingredient (IngredientTag (..))
 import LocalCooking.Spec.Tag (tag, AnyTag (TagIngredient))
 import LocalCooking.Spec.Common.Form.Search as Search
 import LocalCooking.Spec.Common.Form.SearchResults as SearchResults
@@ -59,15 +59,15 @@ spec :: forall eff
           , disabled :: IxSignal (Effects eff) Boolean
           }
         , results ::
-          { setQueue :: One.Queue (write :: WRITE) (Effects eff) (Array IngredientName)
-          , addQueue :: One.Queue (write :: WRITE) (Effects eff) (Array IngredientName)
-          , delQueue :: One.Queue (write :: WRITE) (Effects eff) IngredientName
-          , signal :: IxSignal (Effects eff) (Array IngredientName)
+          { setQueue :: One.Queue (write :: WRITE) (Effects eff) (Array IngredientTag)
+          , addQueue :: One.Queue (write :: WRITE) (Effects eff) (Array IngredientTag)
+          , delQueue :: One.Queue (write :: WRITE) (Effects eff) IngredientTag
+          , signal :: IxSignal (Effects eff) (Array IngredientTag)
           }
         , decisions ::
-          { addQueue :: One.Queue (write :: WRITE) (Effects eff) IngredientName
-          , delQueue :: One.Queue (write :: WRITE) (Effects eff) IngredientName
-          , signal :: IxSignal (Effects eff) (Array IngredientName)
+          { addQueue :: One.Queue (write :: WRITE) (Effects eff) IngredientTag
+          , delQueue :: One.Queue (write :: WRITE) (Effects eff) IngredientTag
+          , signal :: IxSignal (Effects eff) (Array IngredientTag)
           }
         }
      -> T.Spec eff State Unit Action
