@@ -75,10 +75,16 @@ main = do
   tagQueues <- newTagQueues
   siteErrorQueue <- One.newQueue
 
+  tagSearchResultsQueues <- do
+    dietTags <- writeOnly <$> One.newQueue
+    pure
+      { dietTags
+      }
+
   tagSearch <- mountTagSearchQueues tagQueues
     { onChefTagSearchResult: \_ -> pure unit
     , onCultureTagSearchResult: \_ -> pure unit
-    , onDietTagSearchResult: \_ -> pure unit
+    , onDietTagSearchResult: One.putQueue tagSearchResultsQueues.dietTags
     , onFarmTagSearchResult: \_ -> pure unit
     , onIngredientTagSearchResult: \_ -> pure unit
     , onMealTagSearchResult: \_ -> pure unit
@@ -106,6 +112,8 @@ main = do
           { getCustomerQueues: mitchQueues.getCustomerQueues
           , setCustomerQueues: mitchQueues.setCustomerQueues
           , siteErrorQueue: writeOnly siteErrorQueue
+          , tagSearch
+          , tagSearchResultsQueues
           }
       , obtain: \{user} -> do
         PreUserDetails mUser <- sequential $ PreUserDetails <$> user

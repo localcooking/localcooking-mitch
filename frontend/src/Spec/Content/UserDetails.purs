@@ -9,6 +9,8 @@ import Spec.Content.UserDetails.Diet (diets)
 import Spec.Content.UserDetails.Allergies (allergies)
 import LocalCooking.Thermite.Params (LocalCookingParams, LocalCookingState, initLocalCookingState, performActionLocalCooking, LocalCookingAction, whileMountedLocalCooking)
 import LocalCooking.Dependencies.Mitch (GetCustomerSparrowClientQueues, SetCustomerSparrowClientQueues)
+import LocalCooking.Dependencies.Tag (TagSearch)
+import LocalCooking.Common.Tag.Diet (DietTag)
 
 import Prelude
 import Data.Lens (Lens', lens)
@@ -55,12 +57,18 @@ spec :: forall eff
      -> { getCustomerQueues :: GetCustomerSparrowClientQueues (Effects eff)
         , setCustomerQueues :: SetCustomerSparrowClientQueues (Effects eff)
         , siteErrorQueue :: One.Queue (write :: WRITE) (Effects eff) SiteError
+        , tagSearch :: TagSearch (Effects eff)
+        , tagSearchResultsQueues ::
+          { dietTags :: One.Queue (write :: WRITE) (Effects eff) (Array DietTag)
+          }
         }
      -> T.Spec (Effects eff) State Unit Action
 spec params
   { getCustomerQueues
   , setCustomerQueues
   , siteErrorQueue
+  , tagSearch
+  , tagSearchResultsQueues
   } = T.simpleSpec performAction render
   where
     performAction action props state = case action of
@@ -85,6 +93,9 @@ spec params
                   }
                 UserDetailsOrdersLink -> orders
                 UserDetailsDietLink -> diets
+                  { tagSearch
+                  , dietTagSearchResultsQueue: tagSearchResultsQueues.dietTags
+                  }
                 UserDetailsAllergiesLink -> allergies
                 _ -> R.text ""
             _ -> R.text ""
@@ -96,6 +107,10 @@ userDetails :: forall eff
             -> { getCustomerQueues :: GetCustomerSparrowClientQueues (Effects eff)
                , setCustomerQueues :: SetCustomerSparrowClientQueues (Effects eff)
                , siteErrorQueue :: One.Queue (write :: WRITE) (Effects eff) SiteError
+               , tagSearch :: TagSearch (Effects eff)
+               , tagSearchResultsQueues ::
+                 { dietTags :: One.Queue (write :: WRITE) (Effects eff) (Array DietTag)
+                 }
                }
             -> R.ReactElement
 userDetails params args =

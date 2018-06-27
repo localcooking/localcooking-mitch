@@ -61,8 +61,10 @@ spec :: forall eff
         , results ::
           { setQueue :: One.Queue (write :: WRITE) (Effects eff) (Array IngredientTag)
           , addQueue :: One.Queue (write :: WRITE) (Effects eff) (Array IngredientTag)
+          , clearQueue :: One.Queue (write :: WRITE) (Effects eff) Unit
+          , pendingQueue :: One.Queue (write :: WRITE) (Effects eff) Unit
           , delQueue :: One.Queue (write :: WRITE) (Effects eff) IngredientTag
-          , signal :: IxSignal (Effects eff) (Array IngredientTag)
+          , signal :: IxSignal (Effects eff) (SearchResults.SearchResults IngredientTag)
           }
         , decisions ::
           { addQueue :: One.Queue (write :: WRITE) (Effects eff) IngredientTag
@@ -107,6 +109,8 @@ spec {search,submit,results,decisions} = T.simpleSpec performAction render
       , SearchResults.results
         { setQueue: results.setQueue
         , addQueue: results.addQueue
+        , clearQueue: results.clearQueue
+        , pendingQueue: results.pendingQueue
         , delQueue: results.delQueue
         , resultsSignal: results.signal
         , renderA: \i ->
@@ -147,6 +151,8 @@ allergies =
             , results:
               { setQueue: resultsSetQueue
               , addQueue: resultsAddQueue
+              , clearQueue: resultsClearQueue
+              , pendingQueue: resultsPendingQueue
               , delQueue: resultsDelQueue
               , signal: resultsSignal
               }
@@ -165,8 +171,10 @@ allergies =
     searchSetQueue = unsafePerformEff $ writeOnly <$> One.newQueue
     resultsSetQueue = unsafePerformEff $ writeOnly <$> One.newQueue
     resultsAddQueue = unsafePerformEff $ writeOnly <$> One.newQueue
+    resultsClearQueue = unsafePerformEff $ writeOnly <$> One.newQueue
+    resultsPendingQueue = unsafePerformEff $ writeOnly <$> One.newQueue
     resultsDelQueue = unsafePerformEff $ writeOnly <$> One.newQueue
-    resultsSignal = unsafePerformEff $ IxSignal.make []
+    resultsSignal = unsafePerformEff $ IxSignal.make SearchResults.None
     decisionsAddQueue = unsafePerformEff $ writeOnly <$> One.newQueue
     decisionsDelQueue = unsafePerformEff $ writeOnly <$> One.newQueue
     decisionsSignal = unsafePerformEff $ IxSignal.make []
